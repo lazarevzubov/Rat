@@ -1,6 +1,6 @@
 import SwiftData
 
-/// A single day within a program template (e.g. "Day 1"), holding the exercises planned for that day.
+/// A single day within a program template (e.g., "Day 1"), holding the exercises planned for that day.
 @Model
 final class DayTemplate {
 
@@ -9,7 +9,7 @@ final class DayTemplate {
     /// The exercises planned for this day, in order.
     @Relationship(deleteRule: .cascade, inverse: \ExerciseTemplate.dayTemplate)
     var exerciseTemplates = [ExerciseTemplate]()
-    /// The day's user-facing name (e.g. "Day 1").
+    /// The day's user-facing name (e.g., "Day 1").
     var name: String
     /// This day's position within its program, used to cycle through days in order.
     var position: Int
@@ -19,6 +19,9 @@ final class DayTemplate {
     // MARK: - Initialization
 
     /// Creates a day template with the given name and position.
+    /// - Parameters:
+    ///   - name: The day's user-facing name (e.g., "Day 1").
+    ///   - position: This day's position within its program.
     init(name: String, position: Int) {
         self.name = name
         self.position = position

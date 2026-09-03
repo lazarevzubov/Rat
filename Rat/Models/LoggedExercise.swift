@@ -19,6 +19,9 @@ final class LoggedExercise {
     // MARK: - Initialization
 
     /// Creates a logged exercise with the given name and position.
+    /// - Parameters:
+    ///   - exerciseName: The exercise's name at logging time.
+    ///   - position: This exercise's position within its session.
     init(exerciseName: String, position: Int) {
         self.exerciseName = exerciseName
         self.position = position

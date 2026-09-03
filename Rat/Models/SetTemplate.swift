@@ -1,6 +1,6 @@
 import SwiftData
 
-/// A single planned set within an exercise template — either a warm-up or a working set.
+/// A single planned set within an exercise template—either a warm-up or a working set.
 @Model
 final class SetTemplate {
 
@@ -21,7 +21,13 @@ final class SetTemplate {
 
     // MARK: - Initialization
 
-    /// Creates a set template of the given kind, target reps, and position.
+    /// Creates a set template.
+    /// - Parameters:
+    ///   - kind: Whether this is a warm-up or working set.
+    ///   - targetReps: The number of reps this set targets.
+    ///   - position: This set's position within its exercise.
+    ///   - warmupWeight: Free weight entry in kg, used only when `kind == .warmup`. Defaults to `nil`.
+    ///   - percentOfMax: Percent of the exercise's max, used only when `kind == .working`. Defaults to `nil`.
     init(kind: SetKind, targetReps: Int, position: Int, warmupWeight: Double? = nil, percentOfMax: Int? = nil) {
         self.kind = kind
         self.targetReps = targetReps

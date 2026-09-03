@@ -14,7 +14,8 @@ final class Program {
 
     // MARK: - Initialization
 
-    /// Creates a program with the given name and no days yet.
+    /// Creates a program.
+    /// - Parameter name: The program's user-facing name.
     init(name: String) {
         self.name = name
     }

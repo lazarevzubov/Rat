@@ -19,6 +19,9 @@ final class ExerciseTemplate {
     // MARK: - Initialization
 
     /// Creates an exercise template with the given name and position.
+    /// - Parameters:
+    ///   - name: The exercise's free-text name.
+    ///   - position: This exercise's position within its day.
     init(name: String, position: Int) {
         self.name = name
         self.position = position

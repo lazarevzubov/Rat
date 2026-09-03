@@ -1,14 +1,22 @@
-import Foundation
 import SwiftData
 
+/// A workout program made up of ordered day templates.
 @Model
 final class Program {
+
+    // MARK: - Properties
+
+    /// The days that make up this program, cycled in order.
+    @Relationship(deleteRule: .cascade, inverse: \DayTemplate.program)
+    var dayTemplates = [DayTemplate]()
+    /// The program's user-facing name.
     var name: String
 
-    @Relationship(deleteRule: .cascade, inverse: \DayTemplate.program)
-    var dayTemplates: [DayTemplate] = []
+    // MARK: - Initialization
 
+    /// Creates a program with the given name and no days yet.
     init(name: String) {
         self.name = name
     }
+
 }

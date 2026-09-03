@@ -1,7 +1,12 @@
 import Testing
 
 struct RatTests {
-    @Test func placeholder() {
+
+    // MARK: - Methods
+
+    @Test
+    func placeholder() {
         #expect(true)
     }
+
 }

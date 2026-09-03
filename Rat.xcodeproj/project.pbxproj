@@ -6,21 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		094E71C18FDAD2A301137ECB /* WorkoutSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87440031856DD2B1A08FC06 /* WorkoutSession.swift */; };
-		1D58BFC5C74CA0D52E331258 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411F1858D23F432C0E6FA739 /* ContentView.swift */; };
-		69773C509AB2C08C86B1101F /* Program.swift in Sources */ = {isa = PBXBuildFile; fileRef = 209A503CBB752D9F15966A3C /* Program.swift */; };
-		84B68DC04767FEAFC8F87715 /* LoggedExercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30D3CEA764D330536F7A51EC /* LoggedExercise.swift */; };
-		86C91488DDEFE136CB76DA27 /* ExerciseTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A90DEC64A2BBB4CA983D0FD /* ExerciseTemplate.swift */; };
-		9D26B394469EEFEE7E69D1DA /* LoggedSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFCC27F427F56CBCCCE1E8D7 /* LoggedSet.swift */; };
-		AE03CC7E50E2664FCE8E1092 /* SetTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB801FBA0846855CCF7B4A18 /* SetTemplate.swift */; };
-		C9BF9EB9CBAB398988C237E8 /* DayTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 603252A011B580834BB3BDDE /* DayTemplate.swift */; };
-		D8786A4E08A7E1C4C12A2FED /* RatApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8DBD775344E3A19EF6EEFA6 /* RatApp.swift */; };
-		DC644DC5198F7907F3773609 /* SetKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D22776E0AC4C97ED456A70F /* SetKind.swift */; };
-		EF93BD3C618287644D9DFE04 /* RatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F86E73C024F8C7DD6D65842 /* RatTests.swift */; };
-		F2E672594F687E6F3CE115F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4E263FF8E7BA8EE9F8CA7A39 /* Assets.xcassets */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		7757FF9DD8BB4DE164AB5BEA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -32,38 +17,31 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		209A503CBB752D9F15966A3C /* Program.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Program.swift; sourceTree = "<group>"; };
-		30D3CEA764D330536F7A51EC /* LoggedExercise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedExercise.swift; sourceTree = "<group>"; };
-		411F1858D23F432C0E6FA739 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		4836253ACC6A7F047E5F08A8 /* RatTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RatTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		4E263FF8E7BA8EE9F8CA7A39 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5CEB664F20F8DC57135502E5 /* Rat.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Rat.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		603252A011B580834BB3BDDE /* DayTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayTemplate.swift; sourceTree = "<group>"; };
-		7F86E73C024F8C7DD6D65842 /* RatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RatTests.swift; sourceTree = "<group>"; };
-		8A90DEC64A2BBB4CA983D0FD /* ExerciseTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseTemplate.swift; sourceTree = "<group>"; };
-		9D22776E0AC4C97ED456A70F /* SetKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetKind.swift; sourceTree = "<group>"; };
-		AB801FBA0846855CCF7B4A18 /* SetTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetTemplate.swift; sourceTree = "<group>"; };
-		BFCC27F427F56CBCCCE1E8D7 /* LoggedSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedSet.swift; sourceTree = "<group>"; };
-		C8DBD775344E3A19EF6EEFA6 /* RatApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RatApp.swift; sourceTree = "<group>"; };
-		D87440031856DD2B1A08FC06 /* WorkoutSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutSession.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		C65F43C130489F5200348078 /* Rat */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Rat;
+			sourceTree = "<group>";
+		};
+		C65F43CE30489F9700348078 /* RatTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = RatTests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXGroup section */
 		24FEF048CA68E26808EE475B = {
 			isa = PBXGroup;
 			children = (
-				B7C2DE645B151C151FB1EF77 /* Rat */,
-				2CAE2600D5FC2A3D000E52DD /* RatTests */,
+				C65F43C130489F5200348078 /* Rat */,
+				C65F43CE30489F9700348078 /* RatTests */,
 				74E04C376A489C5A79FA53CA /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		2CAE2600D5FC2A3D000E52DD /* RatTests */ = {
-			isa = PBXGroup;
-			children = (
-				7F86E73C024F8C7DD6D65842 /* RatTests.swift */,
-			);
-			path = RatTests;
 			sourceTree = "<group>";
 		};
 		74E04C376A489C5A79FA53CA /* Products */ = {
@@ -73,32 +51,6 @@
 				4836253ACC6A7F047E5F08A8 /* RatTests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		B3495C1A58B67D1B2545465F /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				603252A011B580834BB3BDDE /* DayTemplate.swift */,
-				8A90DEC64A2BBB4CA983D0FD /* ExerciseTemplate.swift */,
-				30D3CEA764D330536F7A51EC /* LoggedExercise.swift */,
-				BFCC27F427F56CBCCCE1E8D7 /* LoggedSet.swift */,
-				209A503CBB752D9F15966A3C /* Program.swift */,
-				9D22776E0AC4C97ED456A70F /* SetKind.swift */,
-				AB801FBA0846855CCF7B4A18 /* SetTemplate.swift */,
-				D87440031856DD2B1A08FC06 /* WorkoutSession.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		B7C2DE645B151C151FB1EF77 /* Rat */ = {
-			isa = PBXGroup;
-			children = (
-				4E263FF8E7BA8EE9F8CA7A39 /* Assets.xcassets */,
-				411F1858D23F432C0E6FA739 /* ContentView.swift */,
-				C8DBD775344E3A19EF6EEFA6 /* RatApp.swift */,
-				B3495C1A58B67D1B2545465F /* Models */,
-			);
-			path = Rat;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -114,6 +66,9 @@
 			);
 			dependencies = (
 				549B7DBD7882FB157B698079 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				C65F43CE30489F9700348078 /* RatTests */,
 			);
 			name = RatTests;
 			packageProductDependencies = (
@@ -133,6 +88,9 @@
 			);
 			dependencies = (
 			);
+			fileSystemSynchronizedGroups = (
+				C65F43C130489F5200348078 /* Rat */,
+			);
 			name = Rat;
 			packageProductDependencies = (
 			);
@@ -148,8 +106,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
-				TargetAttributes = {
-				};
 			};
 			buildConfigurationList = D65FB38EE8D2843D1E1597DF /* Build configuration list for PBXProject "Rat" */;
 			developmentRegion = en;
@@ -176,7 +132,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F2E672594F687E6F3CE115F4 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -187,16 +142,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1D58BFC5C74CA0D52E331258 /* ContentView.swift in Sources */,
-				C9BF9EB9CBAB398988C237E8 /* DayTemplate.swift in Sources */,
-				86C91488DDEFE136CB76DA27 /* ExerciseTemplate.swift in Sources */,
-				84B68DC04767FEAFC8F87715 /* LoggedExercise.swift in Sources */,
-				9D26B394469EEFEE7E69D1DA /* LoggedSet.swift in Sources */,
-				69773C509AB2C08C86B1101F /* Program.swift in Sources */,
-				D8786A4E08A7E1C4C12A2FED /* RatApp.swift in Sources */,
-				DC644DC5198F7907F3773609 /* SetKind.swift in Sources */,
-				AE03CC7E50E2664FCE8E1092 /* SetTemplate.swift in Sources */,
-				094E71C18FDAD2A301137ECB /* WorkoutSession.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -204,7 +149,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EF93BD3C618287644D9DFE04 /* RatTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

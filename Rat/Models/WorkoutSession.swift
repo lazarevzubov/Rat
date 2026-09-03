@@ -17,7 +17,10 @@ final class WorkoutSession {
 
     // MARK: - Initialization
 
-    /// Creates a workout session for the given date and day name.
+    /// Creates a workout session.
+    /// - Parameters:
+    ///   - date: The date this workout took place.
+    ///   - dayName: The day template's name at logging time.
     init(date: Date, dayName: String) {
         self.date = date
         self.dayName = dayName

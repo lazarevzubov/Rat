@@ -21,7 +21,13 @@ final class LoggedSet {
 
     // MARK: - Initialization
 
-    /// Creates a logged set with the given kind, weight, reps, and position.
+    /// Creates a logged set.
+    /// - Parameters:
+    ///   - kind: Whether this was a warm-up or working set.
+    ///   - weight: The weight actually used, in kg.
+    ///   - reps: The number of reps actually performed.
+    ///   - position: This set's position within its exercise.
+    ///   - increaseNextTime: Whether the user flagged this set to increase next time.
     init(kind: SetKind, weight: Double, reps: Int, position: Int, increaseNextTime: Bool = false) {
         self.kind = kind
         self.weight = weight

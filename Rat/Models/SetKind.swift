@@ -2,7 +2,7 @@
 enum SetKind: String, Codable {
 
     /// A warm-up set, entered as a free weight rather than a percentage of max.
-    case warmup
+    case warmUp
     /// A working set, entered as a percentage of the exercise's max.
     case working
 

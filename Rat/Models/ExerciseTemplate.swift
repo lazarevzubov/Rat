@@ -8,6 +8,8 @@ final class ExerciseTemplate {
 
     /// The day this exercise belongs to.
     var dayTemplate: DayTemplate?
+    /// The current working max for this exercise, in kg.
+    var max: Double
     /// The exercise's free-text name.
     var name: String
     /// This exercise's position within its day, used to order exercises.
@@ -18,13 +20,15 @@ final class ExerciseTemplate {
 
     // MARK: - Initialization
 
-    /// Creates an exercise template with the given name and position.
+    /// Creates an exercise template.
     /// - Parameters:
     ///   - name: The exercise's free-text name.
     ///   - position: This exercise's position within its day.
-    init(name: String, position: Int) {
+    ///   - max: The current working max for this exercise, in kg.
+    init(name: String, position: Int, max: Double) {
         self.name = name
         self.position = position
+        self.max = max
     }
 
 }

@@ -16,8 +16,8 @@ final class SetTemplate {
     var position: Int
     /// The number of reps this set targets.
     var targetReps: Int
-    /// Free weight entry in kg, used only when `kind == .warmup`.
-    var warmupWeight: Double?
+    /// Free weight entry in kg, used only when `kind == .warmUp`.
+    var warmUpWeight: Double?
 
     // MARK: - Initialization
 
@@ -26,13 +26,13 @@ final class SetTemplate {
     ///   - kind: Whether this is a warm-up or working set.
     ///   - targetReps: The number of reps this set targets.
     ///   - position: This set's position within its exercise.
-    ///   - warmupWeight: Free weight entry in kg, used only when `kind == .warmup`. Defaults to `nil`.
+    ///   - warmUpWeight: Free weight entry in kg, used only when `kind == .warmUp`. Defaults to `nil`.
     ///   - percentOfMax: Percent of the exercise's max, used only when `kind == .working`. Defaults to `nil`.
-    init(kind: SetKind, targetReps: Int, position: Int, warmupWeight: Double? = nil, percentOfMax: Int? = nil) {
+    init(kind: SetKind, targetReps: Int, position: Int, warmUpWeight: Double? = nil, percentOfMax: Int? = nil) {
         self.kind = kind
         self.targetReps = targetReps
         self.position = position
-        self.warmupWeight = warmupWeight
+        self.warmUpWeight = warmUpWeight
         self.percentOfMax = percentOfMax
     }
 

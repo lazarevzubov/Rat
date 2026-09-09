@@ -13,30 +13,41 @@ struct RatApp: App {
         WindowGroup {
             ContentView()
         }
-            .modelContainer(modelContainer)
     }
 
     // MARK: Private properties
 
-    private let modelContainer: ModelContainer = {
+    private let programService: ProgramService
+
+    // MARK: - Initialization
+
+    init() {
+#if DEBUG
+        let storedInMemory = ProcessInfo.processInfo.environment["TEST"] != nil
+#else
+        let storedInMemory = false
+#endif
         let schema = Schema(
             [
-                Program.self,
-                DayTemplate.self,
-                ExerciseTemplate.self,
-                SetTemplate.self,
-                WorkoutSession.self,
-                LoggedExercise.self,
-                LoggedSet.self
+                ProgramEntity.self,
+                DayTemplateEntity.self,
+                ExerciseTemplateEntity.self,
+                SetTemplateEntity.self,
+                WorkoutSessionEntity.self,
+                LoggedExerciseEntity.self,
+                LoggedSetEntity.self
             ]
         )
-        let configuration = ModelConfiguration(schema: schema)
+        let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: storedInMemory)
 
+        let modelContainer: ModelContainer
         do {
-            return try ModelContainer(for: schema, configurations: [configuration])
+            modelContainer = try ModelContainerFactory.makeModelContainer(schema: schema, configuration: configuration)
         } catch {
-            fatalError("Failed to create the SwiftData model container: \(error)")
+            fatalError("Could not create ModelContainer, even after resetting the store: \(error)")
         }
-    }()
+
+        programService = ProgramPersistenceService(modelContainer: modelContainer)
+    }
 
 }

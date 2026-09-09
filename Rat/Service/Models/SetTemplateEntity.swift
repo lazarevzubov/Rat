@@ -1,13 +1,16 @@
+import Foundation
 import SwiftData
 
 /// A single planned set within an exercise template—either a warm-up or a working set.
 @Model
-final class SetTemplate {
+final class SetTemplateEntity {
 
     // MARK: - Properties
 
     /// The exercise this set belongs to.
-    var exerciseTemplate: ExerciseTemplate?
+    var exerciseTemplate: ExerciseTemplateEntity?
+    /// The entity's stable identifier.
+    var id: UUID
     /// Whether this is a warm-up or working set.
     var kind: SetKind
     /// Percent of the exercise's max, used only when `kind == .working`.
@@ -21,19 +24,28 @@ final class SetTemplate {
 
     // MARK: - Initialization
 
-    /// Creates a set template.
+    /// Creates a set template entity.
     /// - Parameters:
     ///   - kind: Whether this is a warm-up or working set.
     ///   - targetReps: The number of reps this set targets.
     ///   - position: This set's position within its exercise.
     ///   - warmUpWeight: Free weight entry in kg, used only when `kind == .warmUp`. Defaults to `nil`.
     ///   - percentOfMax: Percent of the exercise's max, used only when `kind == .working`. Defaults to `nil`.
-    init(kind: SetKind, targetReps: Int, position: Int, warmUpWeight: Double? = nil, percentOfMax: Int? = nil) {
+    ///   - id: The entity's stable identifier. Defaults to a new identifier.
+    init(
+        kind: SetKind,
+        targetReps: Int,
+        position: Int,
+        warmUpWeight: Double? = nil,
+        percentOfMax: Int? = nil,
+        id: UUID = UUID()
+    ) {
         self.kind = kind
         self.targetReps = targetReps
         self.position = position
         self.warmUpWeight = warmUpWeight
         self.percentOfMax = percentOfMax
+        self.id = id
     }
 
 }

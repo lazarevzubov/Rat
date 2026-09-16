@@ -11,13 +11,14 @@ struct RatApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(viewModel: viewModel)
         }
     }
 
     // MARK: Private properties
 
-    private let programService: ProgramService
+    @State
+    private var viewModel: ProgramListViewModel
 
     // MARK: - Initialization
 
@@ -47,7 +48,8 @@ struct RatApp: App {
             fatalError("Could not create ModelContainer, even after resetting the store: \(error)")
         }
 
-        programService = ProgramPersistenceService(modelContainer: modelContainer)
+        let programService = ProgramPersistenceService(modelContainer: modelContainer)
+        _viewModel = State(initialValue: ProgramListViewModel(programService: programService))
     }
 
 }

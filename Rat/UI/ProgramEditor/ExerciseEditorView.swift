@@ -1,0 +1,105 @@
+import Foundation
+import SwiftUI
+
+/// Edits a single exercise template's name, working max, and set templates.
+struct ExerciseEditorView: View {
+
+    // MARK: -
+
+    /// The fields that can be focused within this screen, including one per set row, so all of them can share a single
+    /// source of truth for "what's currently focused" and be dismissed together.
+    enum Field: Hashable {
+
+        /// The working max field.
+        case max
+        /// The exercise name field.
+        case name
+        /// A specific set's weight or percent-of-max field, identified by that set's stable ID.
+        case setWeight(UUID)
+
+    }
+
+    // MARK: - Properties
+
+    // MARK: View protocol properties
+
+    var body: some View {
+        Form {
+            Section("Name") {
+                TextField("Exercise Name", text: $exercise.name)
+                    .focused($focusedField, equals: .name)
+            }
+            Section("Working Max") {
+                HStack {
+                    TextField("Max", value: $exercise.max, format: .number)
+                        .focused($focusedField, equals: .max)
+                        .keyboardType(.decimalPad)
+                    Text("kg")
+                        .foregroundStyle(.secondary)
+                }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Working Max")
+                    .accessibilityValue("\(exercise.max.formatted()) kilograms")
+            }
+            Section("Sets") {
+                ForEach($exercise.setTemplates) { $set in
+                    SetRowView(set: $set, exerciseMax: exercise.max, focusedField: $focusedField)
+                }
+                    .onDelete { exercise.deleteSet(at: $0) }
+                    .onMove { exercise.moveSet(from: $0, to: $1) }
+                Button("Add Set", systemImage: "plus") { exercise.addSet() }
+            }
+        }
+            .background(dismissFocusBackground)
+            .navigationTitle(
+                exercise.name.isEmpty
+                    ? "New Exercise"
+                    : exercise.name
+            )
+            .onDisappear { focusedField = nil }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    EditButton()
+                        .accessibilityLabel("Reorder or Delete Sets")
+                }
+            }
+    }
+
+    // MARK: Private properties
+
+    private var dismissFocusBackground: some View {
+        Color.clear
+            .contentShape(Rectangle())
+            .onTapGesture { focusedField = nil }
+    }
+    @Binding
+    private var exercise: ExerciseTemplate
+    @FocusState
+    private var focusedField: Field?
+
+    // MARK: - Initialization
+
+    /// Creates an exercise editor view.
+    /// - Parameter exercise: A binding to the exercise template being edited.
+    init(exercise: Binding<ExerciseTemplate>) {
+        _exercise = exercise
+    }
+
+}
+
+// MARK: -
+
+#Preview {
+    @Previewable
+    @State
+    var exercise = ExerciseTemplate(
+        name: "Bench Press",
+        position: 0,
+        max: 100,
+        setTemplates: [SetTemplate(kind: .working, targetReps: 5, position: 0, percentOfMax: 80)]
+    )
+
+    NavigationStack {
+        ExerciseEditorView(exercise: $exercise)
+    }
+}

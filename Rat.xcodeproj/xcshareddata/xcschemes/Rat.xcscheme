@@ -35,6 +35,20 @@
                ReferencedContainer = "container:Rat.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "0E53A31BC989B9E7C661DC24"
+               BuildableName = "RatUITests.xctest"
+               BlueprintName = "RatUITests"
+               ReferencedContainer = "container:Rat.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -61,6 +75,16 @@
                BlueprintIdentifier = "A187B9290FC3BBD7D3A74F95"
                BuildableName = "RatTests.xctest"
                BlueprintName = "RatTests"
+               ReferencedContainer = "container:Rat.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "0E53A31BC989B9E7C661DC24"
+               BuildableName = "RatUITests.xctest"
+               BlueprintName = "RatUITests"
                ReferencedContainer = "container:Rat.xcodeproj">
             </BuildableReference>
          </TestableReference>

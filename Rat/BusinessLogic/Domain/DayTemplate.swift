@@ -29,4 +29,35 @@ struct DayTemplate: Identifiable, Sendable {
         self.id = id
     }
 
+    // MARK: - Methods
+
+    /// Appends a new, empty exercise at the end of `exerciseTemplates`.
+    mutating func addExercise() {
+        exerciseTemplates.append(ExerciseTemplate(name: "", position: exerciseTemplates.count, max: 0))
+    }
+
+    /// Removes the exercises at the given offsets, then renumbers the remaining exercises' positions.
+    /// - Parameter offsets: The offsets, within `exerciseTemplates`, of the exercises to remove.
+    mutating func deleteExercise(at offsets: IndexSet) {
+        exerciseTemplates.remove(atOffsets: offsets)
+        renumberExercises()
+    }
+
+    /// Moves exercises within `exerciseTemplates`, then renumbers all exercises' positions.
+    /// - Parameters:
+    ///   - source: The offsets, within `exerciseTemplates`, of the exercises to move.
+    ///   - destination: The offset to move the exercises to.
+    mutating func moveExercise(from source: IndexSet, to destination: Int) {
+        exerciseTemplates.move(fromOffsets: source, toOffset: destination)
+        renumberExercises()
+    }
+
+    // MARK: Private methods
+
+    private mutating func renumberExercises() {
+        for index in exerciseTemplates.indices {
+            exerciseTemplates[index].position = index
+        }
+    }
+
 }

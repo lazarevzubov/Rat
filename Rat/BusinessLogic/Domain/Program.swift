@@ -25,4 +25,35 @@ struct Program: Identifiable, Sendable {
         self.id = id
     }
 
+    // MARK: - Methods
+
+    /// Appends a new, empty day at the end of `dayTemplates`.
+    mutating func addDay() {
+        dayTemplates.append(DayTemplate(name: "", position: dayTemplates.count))
+    }
+
+    /// Removes the days at the given offsets, then renumbers the remaining days' positions.
+    /// - Parameter offsets: The offsets, within `dayTemplates`, of the days to remove.
+    mutating func deleteDay(at offsets: IndexSet) {
+        dayTemplates.remove(atOffsets: offsets)
+        renumberDays()
+    }
+
+    /// Moves days within `dayTemplates`, then renumbers all days' positions.
+    /// - Parameters:
+    ///   - source: The offsets, within `dayTemplates`, of the days to move.
+    ///   - destination: The offset to move the days to.
+    mutating func moveDay(from source: IndexSet, to destination: Int) {
+        dayTemplates.move(fromOffsets: source, toOffset: destination)
+        renumberDays()
+    }
+
+    // MARK: Private methods
+
+    private mutating func renumberDays() {
+        for index in dayTemplates.indices {
+            dayTemplates[index].position = index
+        }
+    }
+
 }

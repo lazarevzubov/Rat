@@ -44,4 +44,21 @@ struct SetTemplate: Identifiable, Sendable {
         self.id = id
     }
 
+    // MARK: - Methods
+
+    /// Switches this set to the given kind, clearing the field for the previous kind and defaulting the field for the
+    /// new one so the set is never left with a stale value from the kind it's switching away from.
+    /// - Parameter newKind: The kind to switch to.
+    mutating func setKind(to newKind: SetKind) {
+        kind = newKind
+        switch newKind {
+            case .warmUp:
+                percentOfMax = nil
+                warmUpWeight = warmUpWeight ?? .zero
+            case .working:
+                percentOfMax = percentOfMax ?? 100
+                warmUpWeight = nil
+        }
+    }
+
 }

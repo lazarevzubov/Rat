@@ -9,13 +9,26 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            Text("Rat")
-                .navigationTitle("Rat")
+            ProgramListView(viewModel: viewModel)
         }
+    }
+
+    // MARK: Private properties
+
+    private let viewModel: ProgramListViewModel
+
+    // MARK: - Initialization
+
+    /// Creates the root view.
+    /// - Parameter viewModel: The view model backing the program list this view shows.
+    init(viewModel: ProgramListViewModel) {
+        self.viewModel = viewModel
     }
 
 }
 
+// MARK: -
+
 #Preview {
-    ContentView()
+    ContentView(viewModel: ProgramListViewModel(programService: PreviewSupport.makeProgramService()))
 }

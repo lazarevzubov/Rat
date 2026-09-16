@@ -6,8 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		986DDC33A803A26267ABBB1C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7EEE4365459B4F4F02A16A6 /* Foundation.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		7757FF9DD8BB4DE164AB5BEA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A1FAE932D553BED53EE28E88 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CFA84E5B2930CF24A2F231F1;
+			remoteInfo = Rat;
+		};
+		AFEA6B67C1FE0F29F8A6E7BD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A1FAE932D553BED53EE28E88 /* Project object */;
 			proxyType = 1;
@@ -19,12 +30,19 @@
 /* Begin PBXFileReference section */
 		4836253ACC6A7F047E5F08A8 /* RatTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RatTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5CEB664F20F8DC57135502E5 /* Rat.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Rat.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6439937CAFFC6DAA6DC22FF6 /* RatUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RatUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7EEE4365459B4F4F02A16A6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4B7B2800A7C81E1CE17F777C /* RatTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = RatTests;
+			sourceTree = "<group>";
+		};
+		F7E0E12B2112BF344AAE946D /* RatUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = RatUITests;
 			sourceTree = "<group>";
 		};
 		FD85FA34ED61A934F84F6EC5 /* Rat */ = {
@@ -34,6 +52,17 @@
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
+/* Begin PBXFrameworksBuildPhase section */
+		A33F950BDF327FE8B7D0BECD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				986DDC33A803A26267ABBB1C /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
 /* Begin PBXGroup section */
 		24FEF048CA68E26808EE475B = {
 			isa = PBXGroup;
@@ -41,6 +70,8 @@
 				FD85FA34ED61A934F84F6EC5 /* Rat */,
 				4B7B2800A7C81E1CE17F777C /* RatTests */,
 				74E04C376A489C5A79FA53CA /* Products */,
+				E86C9ABE70024F3630BA74CD /* Frameworks */,
+				F7E0E12B2112BF344AAE946D /* RatUITests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -49,13 +80,51 @@
 			children = (
 				5CEB664F20F8DC57135502E5 /* Rat.app */,
 				4836253ACC6A7F047E5F08A8 /* RatTests.xctest */,
+				6439937CAFFC6DAA6DC22FF6 /* RatUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		E096351C9DBF8D14C5B3096D /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				C7EEE4365459B4F4F02A16A6 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		E86C9ABE70024F3630BA74CD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E096351C9DBF8D14C5B3096D /* iOS */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		0E53A31BC989B9E7C661DC24 /* RatUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 045F1034A0FB5F885147ED6E /* Build configuration list for PBXNativeTarget "RatUITests" */;
+			buildPhases = (
+				06B5088CAAD11D6BD422B320 /* Sources */,
+				A33F950BDF327FE8B7D0BECD /* Frameworks */,
+				A844C4318EFE75430B14ABD2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B8FF9E59872672DAE44CF8BC /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				F7E0E12B2112BF344AAE946D /* RatUITests */,
+			);
+			name = RatUITests;
+			productName = RatUITests;
+			productReference = 6439937CAFFC6DAA6DC22FF6 /* RatUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		A187B9290FC3BBD7D3A74F95 /* RatTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9C02625D063448EAECB9862E /* Build configuration list for PBXNativeTarget "RatTests" */;
@@ -71,8 +140,6 @@
 				4B7B2800A7C81E1CE17F777C /* RatTests */,
 			);
 			name = RatTests;
-			packageProductDependencies = (
-			);
 			productName = RatTests;
 			productReference = 4836253ACC6A7F047E5F08A8 /* RatTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -92,8 +159,6 @@
 				FD85FA34ED61A934F84F6EC5 /* Rat */,
 			);
 			name = Rat;
-			packageProductDependencies = (
-			);
 			productName = Rat;
 			productReference = 5CEB664F20F8DC57135502E5 /* Rat.app */;
 			productType = "com.apple.product-type.application";
@@ -123,6 +188,7 @@
 			targets = (
 				CFA84E5B2930CF24A2F231F1 /* Rat */,
 				A187B9290FC3BBD7D3A74F95 /* RatTests */,
+				0E53A31BC989B9E7C661DC24 /* RatUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -135,9 +201,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A844C4318EFE75430B14ABD2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		06B5088CAAD11D6BD422B320 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		07F6E2CC7CBA63611DE1F6AE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -159,6 +239,12 @@
 			isa = PBXTargetDependency;
 			target = CFA84E5B2930CF24A2F231F1 /* Rat */;
 			targetProxy = 7757FF9DD8BB4DE164AB5BEA /* PBXContainerItemProxy */;
+		};
+		B8FF9E59872672DAE44CF8BC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Rat;
+			target = CFA84E5B2930CF24A2F231F1 /* Rat */;
+			targetProxy = AFEA6B67C1FE0F29F8A6E7BD /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -199,6 +285,41 @@
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rat.app/Rat";
 			};
 			name = Release;
+		};
+		71021F5099CAC3C9157D6663 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.lazarevzubov.RatUITests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Rat;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8E1D269C0FA681D58509AD74 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.lazarevzubov.RatUITests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Rat;
+			};
+			name = Debug;
 		};
 		A4C2DDDA014C51B75B7AC185 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -361,6 +482,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		045F1034A0FB5F885147ED6E /* Build configuration list for PBXNativeTarget "RatUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				71021F5099CAC3C9157D6663 /* Release */,
+				8E1D269C0FA681D58509AD74 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		67E8A75AE1B58977C1C2B6DB /* Build configuration list for PBXNativeTarget "Rat" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

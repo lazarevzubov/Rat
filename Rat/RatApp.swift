@@ -49,7 +49,12 @@ struct RatApp: App {
         }
 
         let programService = ProgramPersistenceService(modelContainer: modelContainer)
-        _viewModel = State(initialValue: ProgramListViewModel(programService: programService))
+        let workoutSessionService = WorkoutSessionPersistenceService(modelContainer: modelContainer)
+        _viewModel = State(
+            initialValue: ProgramListViewModel(
+                programService: programService, workoutSessionService: workoutSessionService
+            )
+        )
     }
 
 }

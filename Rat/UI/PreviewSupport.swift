@@ -5,8 +5,17 @@ enum PreviewSupport {
 
     // MARK: - Methods
 
-    /// Creates a program service backed by an in-memory store, for previews only.
     static func makeProgramService() -> ProgramService {
+        ProgramPersistenceService(modelContainer: makeModelContainer())
+    }
+
+    static func makeWorkoutSessionService() -> WorkoutSessionService {
+        WorkoutSessionPersistenceService(modelContainer: makeModelContainer())
+    }
+
+    // MARK: Private methods
+
+    private static func makeModelContainer() -> ModelContainer {
         let schema = Schema(
             [
                 ProgramEntity.self,
@@ -21,8 +30,7 @@ enum PreviewSupport {
         let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
 
         do {
-            let container = try ModelContainer(for: schema, configurations: configuration)
-            return ProgramPersistenceService(modelContainer: container)
+            return try ModelContainer(for: schema, configurations: configuration)
         } catch {
             fatalError("Could not create an in-memory ModelContainer for previews: \(error)")
         }

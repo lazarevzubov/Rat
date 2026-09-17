@@ -18,13 +18,17 @@ final class ProgramListViewModel {
     // MARK: Private properties
 
     private let programService: ProgramService
+    private let workoutSessionService: WorkoutSessionService
 
     // MARK: - Initialization
 
     /// Creates a program list view model.
-    /// - Parameter programService: The service used to load and delete programs.
-    init(programService: ProgramService) {
+    /// - Parameters:
+    ///   - programService: The service used to load and delete programs.
+    ///   - workoutSessionService: The service used to log and fetch workout sessions.
+    init(programService: ProgramService, workoutSessionService: WorkoutSessionService) {
         self.programService = programService
+        self.workoutSessionService = workoutSessionService
     }
 
     // MARK: - Methods

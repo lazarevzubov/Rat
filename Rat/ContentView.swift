@@ -30,5 +30,10 @@ struct ContentView: View {
 // MARK: -
 
 #Preview {
-    ContentView(viewModel: ProgramListViewModel(programService: PreviewSupport.makeProgramService()))
+    ContentView(
+        viewModel: ProgramListViewModel(
+            programService: PreviewSupport.makeProgramService(),
+            workoutSessionService: PreviewSupport.makeWorkoutSessionService()
+        )
+    )
 }

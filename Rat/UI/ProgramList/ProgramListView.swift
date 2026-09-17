@@ -65,6 +65,11 @@ struct ProgramListView: View {
 
 #Preview {
     NavigationStack {
-        ProgramListView(viewModel: ProgramListViewModel(programService: PreviewSupport.makeProgramService()))
+        ProgramListView(
+            viewModel: ProgramListViewModel(
+                programService: PreviewSupport.makeProgramService(),
+                workoutSessionService: PreviewSupport.makeWorkoutSessionService()
+            )
+        )
     }
 }

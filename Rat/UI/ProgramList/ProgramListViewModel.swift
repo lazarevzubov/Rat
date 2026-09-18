@@ -73,10 +73,16 @@ final class ProgramListViewModel {
 
     /// Creates a view model for editing the given program, wired to reload this list once it's saved.
     /// - Parameter program: The program to edit, or a fresh `Program` to create a new one.
-    func makeProgramEditorViewModel(for program: Program) -> ProgramEditorViewModel {
+    func makeProgramEditorViewModel(program: Program) -> ProgramEditorViewModel {
         ProgramEditorViewModel(program: program, programService: programService) { [weak self] in
             await self?.handleAppear()
         }
+    }
+
+    /// Creates a view model for logging a workout against the given program.
+    /// - Parameter program: The program to work out against.
+    func makeActiveWorkoutViewModel(program: Program) -> ActiveWorkoutViewModel {
+        ActiveWorkoutViewModel(program: program, workoutSessionService: workoutSessionService)
     }
 
 }

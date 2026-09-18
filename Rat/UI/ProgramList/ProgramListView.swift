@@ -11,7 +11,7 @@ struct ProgramListView: View {
         List {
             ForEach(viewModel.programs) { program in
                 NavigationLink(program.name) {
-                    ProgramEditorView(viewModel: viewModel.makeProgramEditorViewModel(for: program))
+                    ProgramEditorView(viewModel: viewModel.makeProgramEditorViewModel(program: program))
                 }
             }
                 .onDelete { viewModel.handleDelete(at: $0) }
@@ -28,7 +28,7 @@ struct ProgramListView: View {
             }
             .sheet(item: $viewModel.newProgram) { program in
                 NavigationStack {
-                    ProgramEditorView(viewModel: viewModel.makeProgramEditorViewModel(for: program))
+                    ProgramEditorView(viewModel: viewModel.makeProgramEditorViewModel(program: program))
                 }
             }
             .task { await viewModel.handleAppear() }

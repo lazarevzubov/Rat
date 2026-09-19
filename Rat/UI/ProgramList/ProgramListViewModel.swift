@@ -10,6 +10,8 @@ final class ProgramListViewModel {
 
     /// A program being created, presented for editing until it's saved or discarded.
     var newProgram: Program?
+    /// The program a workout is being started for, presented until the workout is dismissed.
+    var programStartingWorkout: Program?
     /// The error from the most recent failed load, if any.
     private(set) var loadError: Error?
     /// The currently loaded programs.
@@ -36,6 +38,12 @@ final class ProgramListViewModel {
     /// Handles a tap on the Add Program button.
     func handleAddProgramButtonTap() {
         newProgram = Program(name: "")
+    }
+
+    /// Handles a tap on the Start Workout swipe action for the given program.
+    /// - Parameter program: The program to work out against.
+    func handleStartWorkoutButtonTap(for program: Program) {
+        programStartingWorkout = program
     }
 
     /// Handles the programs at the given offsets being deleted from the list.

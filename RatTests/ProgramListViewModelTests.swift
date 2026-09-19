@@ -60,6 +60,21 @@ struct ProgramListViewModelTests {
     }
 
     @Test
+    func handleStartWorkoutButtonTap_presentsGivenProgramForLogging() {
+        let program = Program(name: "Push Pull Legs")
+
+        let viewModel = ProgramListViewModel(
+            programService: ProgramStubService(), workoutSessionService: WorkoutSessionStubService()
+        )
+        viewModel.handleStartWorkoutButtonTap(for: program)
+
+        #expect(
+            viewModel.programStartingWorkout?.id == program.id,
+            "The tapped program is presented for logging a workout."
+        )
+    }
+
+    @Test
     func handleDelete_removesProgramLocally() async {
         let service = ProgramStubService()
 

@@ -22,12 +22,25 @@ final class ActiveWorkoutUITests: XCTestCase {
         )
 
         app.steppers["Reps: 5"].buttons["Increment"].tap()
-        app.switches["Increase Next Time"].tap()
+
+        let toggle = app.switches["Increase Next Time"]
+        // The row also has a Stepper and a TextField, so the switch's own hit area—not the whole row—must be tapped;
+        // its reported accessibility frame includes the label, so a plain `tap()` lands there instead of the switch.
+        toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+        XCTAssertEqual(toggle.value as? String, "1", "The set is flagged to increase next time.")
 
         app.buttons["Save"].tap()
         XCTAssertTrue(
             app.navigationBars["Programs"].waitForExistence(timeout: 5.0),
             "Saving the workout dismisses back to the program list."
+        )
+
+        app.staticTexts["Push Pull Legs"].swipeRight()
+        app.buttons["Start Workout"].tap()
+        XCTAssertTrue(app.navigationBars["Push"].waitForExistence(timeout: 5.0), "The day cycles back around to Push.")
+        XCTAssertTrue(
+            app.staticTexts["Increase next time"].waitForExistence(timeout: 5.0),
+            "The flagged exercise shows the increase-next-time banner in its next session."
         )
     }
 

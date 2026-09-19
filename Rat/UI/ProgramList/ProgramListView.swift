@@ -13,6 +13,12 @@ struct ProgramListView: View {
                 NavigationLink(program.name) {
                     ProgramEditorView(viewModel: viewModel.makeProgramEditorViewModel(program: program))
                 }
+                    .swipeActions(edge: .leading) {
+                        Button("Start Workout", systemImage: "figure.run") {
+                            viewModel.handleStartWorkoutButtonTap(for: program)
+                        }
+                            .tint(.accentColor)
+                    }
             }
                 .onDelete { viewModel.handleDelete(at: $0) }
         }
@@ -29,6 +35,11 @@ struct ProgramListView: View {
             .sheet(item: $viewModel.newProgram) { program in
                 NavigationStack {
                     ProgramEditorView(viewModel: viewModel.makeProgramEditorViewModel(program: program))
+                }
+            }
+            .sheet(item: $viewModel.programStartingWorkout) { program in
+                NavigationStack {
+                    ActiveWorkoutView(viewModel: viewModel.makeActiveWorkoutViewModel(program: program))
                 }
             }
             .task { await viewModel.handleAppear() }

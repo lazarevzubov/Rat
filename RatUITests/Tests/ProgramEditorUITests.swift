@@ -11,7 +11,7 @@ final class ProgramEditorUITests: XCTestCase {
     }
 
     func testAddProgram_appearsInList_withNameFromEditor() {
-        let app = makeApp()
+        let app = XCUIApplication.launchedForTesting()
 
         app.buttons["Add Program"].tap()
 
@@ -27,7 +27,7 @@ final class ProgramEditorUITests: XCTestCase {
     }
 
     func testAddProgram_withDayAndExerciseAndSet_savesNestedHierarchy() {
-        let app = makeApp()
+        let app = XCUIApplication.launchedForTesting()
 
         app.buttons["Add Program"].tap()
 
@@ -69,7 +69,7 @@ final class ProgramEditorUITests: XCTestCase {
     }
 
     func testDeleteProgram_removesItFromList() {
-        let app = makeApp()
+        let app = XCUIApplication.launchedForTesting()
 
         app.buttons["Add Program"].tap()
 
@@ -87,16 +87,6 @@ final class ProgramEditorUITests: XCTestCase {
             app.staticTexts["Push Pull Legs"].waitForExistence(timeout: 2.0),
             "The deleted program no longer appears in the list."
         )
-    }
-
-    // MARK: Private methods
-
-    private func makeApp() -> XCUIApplication {
-        let app = XCUIApplication()
-        app.launchEnvironment["TEST"] = "1"
-        app.launch()
-
-        return app
     }
 
 }

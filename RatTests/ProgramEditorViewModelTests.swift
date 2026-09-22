@@ -8,10 +8,73 @@ struct ProgramEditorViewModelTests {
     // MARK: - Methods
 
     @Test
+    func filteredExerciseNameSuggestions_returnsMatches_caseInsensitively() {
+        let viewModel = ProgramEditorViewModel(
+            program: Program(name: "Push Pull Legs"),
+            programService: ProgramStubService(),
+            exerciseNameSuggestions: [
+                "Bench Press",
+                "Overhead Press",
+                "Squat"
+            ]
+        ) {
+            // onSave isn't exercised by this test.
+        }
+        #expect(
+            viewModel.filteredExerciseNameSuggestions(matching: "press") == [
+                "Bench Press",
+                "Overhead Press"
+            ],
+            "Suggestions containing the typed text are returned, regardless of case."
+        )
+    }
+
+    @Test
+    func filteredExerciseNameSuggestions_excludesExactMatch() {
+        let viewModel = ProgramEditorViewModel(
+            program: Program(name: "Push Pull Legs"),
+            programService: ProgramStubService(),
+            exerciseNameSuggestions: ["Bench Press"]
+        ) {
+            // onSave isn't exercised by this test.
+        }
+        #expect(
+            viewModel.filteredExerciseNameSuggestions(matching: "Bench Press").isEmpty,
+            "A suggestion identical to the typed text isn't offered."
+        )
+    }
+
+    @Test
+    func filteredExerciseNameSuggestions_givenBlankName_returnsEmpty() {
+        let viewModel = ProgramEditorViewModel(
+            program: Program(name: "Push Pull Legs"),
+            programService: ProgramStubService(),
+            exerciseNameSuggestions: ["Bench Press"]
+        ) {
+            // onSave isn't exercised by this test.
+        }
+        #expect(
+            viewModel.filteredExerciseNameSuggestions(matching: "   ").isEmpty, "A blank name has no suggestions."
+        )
+    }
+
+    @Test
+    func filteredExerciseNameSuggestions_capsAtFiveResults() {
+        let viewModel = ProgramEditorViewModel(
+            program: Program(name: "Push Pull Legs"),
+            programService: ProgramStubService(),
+            exerciseNameSuggestions: (1...6).map { "Press \($0)" }
+        ) {
+            // onSave isn't exercised by this test.
+        }
+        #expect(viewModel.filteredExerciseNameSuggestions(matching: "Press").count == 5, "Suggestions are capped at 5.")
+    }
+
+    @Test
     func handleSaveButtonTap_succeeds_persistsProgram() async {
         let service = ProgramStubService()
         let program = Program(name: "Push Pull Legs")
-        let viewModel = ProgramEditorViewModel(program: program, programService: service) {
+        let viewModel = ProgramEditorViewModel(program: program, programService: service, exerciseNameSuggestions: []) {
             // onSave isn't exercised by this test.
         }
 
@@ -24,7 +87,9 @@ struct ProgramEditorViewModelTests {
         let service = ProgramStubService()
 
         var onSaveCallCount = 0
-        let viewModel = ProgramEditorViewModel(program: Program(name: "Push Pull Legs"), programService: service) {
+        let viewModel = ProgramEditorViewModel(
+            program: Program(name: "Push Pull Legs"), programService: service, exerciseNameSuggestions: []
+        ) {
             onSaveCallCount += 1
         }
 
@@ -35,7 +100,9 @@ struct ProgramEditorViewModelTests {
     @Test
     func handleSaveButtonTap_succeeds_setsDidSave() async {
         let service = ProgramStubService()
-        let viewModel = ProgramEditorViewModel(program: Program(name: "Push Pull Legs"), programService: service) {
+        let viewModel = ProgramEditorViewModel(
+            program: Program(name: "Push Pull Legs"), programService: service, exerciseNameSuggestions: []
+        ) {
             // onSave isn't exercised by this test.
         }
 
@@ -48,7 +115,9 @@ struct ProgramEditorViewModelTests {
         let service = ProgramStubService()
         await service.setSaveError(TestError())
 
-        let viewModel = ProgramEditorViewModel(program: Program(name: "Push Pull Legs"), programService: service) {
+        let viewModel = ProgramEditorViewModel(
+            program: Program(name: "Push Pull Legs"), programService: service, exerciseNameSuggestions: []
+        ) {
             // onSave isn't exercised by this test.
         }
         await viewModel.handleSaveButtonTap().value
@@ -61,7 +130,9 @@ struct ProgramEditorViewModelTests {
         let service = ProgramStubService()
         await service.setSaveError(TestError())
 
-        let viewModel = ProgramEditorViewModel(program: Program(name: "Push Pull Legs"), programService: service) {
+        let viewModel = ProgramEditorViewModel(
+            program: Program(name: "Push Pull Legs"), programService: service, exerciseNameSuggestions: []
+        ) {
             // onSave isn't exercised by this test.
         }
         await viewModel.handleSaveButtonTap().value
@@ -75,7 +146,9 @@ struct ProgramEditorViewModelTests {
         await service.setSaveError(TestError())
 
         var onSaveCallCount = 0
-        let viewModel = ProgramEditorViewModel(program: Program(name: "Push Pull Legs"), programService: service) {
+        let viewModel = ProgramEditorViewModel(
+            program: Program(name: "Push Pull Legs"), programService: service, exerciseNameSuggestions: []
+        ) {
             onSaveCallCount += 1
         }
 
@@ -88,7 +161,9 @@ struct ProgramEditorViewModelTests {
         let service = ProgramStubService()
         await service.setSaveError(TestError())
 
-        let viewModel = ProgramEditorViewModel(program: Program(name: "Push Pull Legs"), programService: service) {
+        let viewModel = ProgramEditorViewModel(
+            program: Program(name: "Push Pull Legs"), programService: service, exerciseNameSuggestions: []
+        ) {
             // onSave isn't exercised by this test.
         }
         await viewModel.handleSaveButtonTap().value
@@ -99,7 +174,9 @@ struct ProgramEditorViewModelTests {
 
     @Test
     func handleAddDayButtonTap_appendsDay() {
-        let viewModel = ProgramEditorViewModel(program: Program(name: "Push Pull Legs"), programService: ProgramStubService()) {
+        let viewModel = ProgramEditorViewModel(
+            program: Program(name: "Push Pull Legs"), programService: ProgramStubService(), exerciseNameSuggestions: []
+        ) {
             // onSave isn't exercised by this test.
         }
         viewModel.handleAddDayButtonTap()
@@ -110,7 +187,9 @@ struct ProgramEditorViewModelTests {
     @Test
     func handleDeleteDay_removesDay() {
         let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
-        let viewModel = ProgramEditorViewModel(program: program, programService: ProgramStubService()) {
+        let viewModel = ProgramEditorViewModel(
+            program: program, programService: ProgramStubService(), exerciseNameSuggestions: []
+        ) {
             // onSave isn't exercised by this test.
         }
 
@@ -127,7 +206,9 @@ struct ProgramEditorViewModelTests {
                 DayTemplate(name: "Pull", position: 1)
             ]
         )
-        let viewModel = ProgramEditorViewModel(program: program, programService: ProgramStubService()) {
+        let viewModel = ProgramEditorViewModel(
+            program: program, programService: ProgramStubService(), exerciseNameSuggestions: []
+        ) {
             // onSave isn't exercised by this test.
         }
 

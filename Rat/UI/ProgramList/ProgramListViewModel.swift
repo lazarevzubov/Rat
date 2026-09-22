@@ -12,6 +12,8 @@ final class ProgramListViewModel {
     var newProgram: Program?
     /// The program a workout is being started for, presented until the workout is dismissed.
     var programStartingWorkout: Program?
+    /// The distinct exercise names used across all programs, offered as autocomplete suggestions when editing an exercise's name.
+    private(set) var exerciseNameSuggestions = [String]()
     /// The error from the most recent failed load, if any.
     private(set) var loadError: Error?
     /// The currently loaded programs.
@@ -72,18 +74,16 @@ final class ProgramListViewModel {
 
     /// Handles this list's view appearing.
     func handleAppear() async {
-        do {
-            programs = try await programService.fetchPrograms()
-        } catch {
-            loadError = error
-        }
+        await reloadProgramsAndExerciseNameSuggestions()
     }
 
     /// Creates a view model for editing the given program, wired to reload this list once it's saved.
     /// - Parameter program: The program to edit, or a fresh `Program` to create a new one.
     func makeProgramEditorViewModel(program: Program) -> ProgramEditorViewModel {
-        ProgramEditorViewModel(program: program, programService: programService) { [weak self] in
-            await self?.handleAppear()
+        ProgramEditorViewModel(
+            program: program, programService: programService, exerciseNameSuggestions: exerciseNameSuggestions
+        ) { [weak self] in
+            await self?.reloadProgramsAndExerciseNameSuggestions()
         }
     }
 
@@ -91,6 +91,20 @@ final class ProgramListViewModel {
     /// - Parameter program: The program to work out against.
     func makeActiveWorkoutViewModel(program: Program) -> ActiveWorkoutViewModel {
         ActiveWorkoutViewModel(program: program, workoutSessionService: workoutSessionService)
+    }
+
+    // MARK: Private methods
+
+    private func reloadProgramsAndExerciseNameSuggestions() async {
+        async let fetchedPrograms = programService.fetchPrograms()
+        async let fetchedExerciseNames = programService.fetchExerciseNames()
+
+        do {
+            programs = try await fetchedPrograms
+        } catch {
+            loadError = error
+        }
+        exerciseNameSuggestions = (try? await fetchedExerciseNames) ?? []
     }
 
 }

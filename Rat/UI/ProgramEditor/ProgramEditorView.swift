@@ -20,7 +20,9 @@ struct ProgramEditorView: View {
                             ? "Untitled Day"
                             : day.name
                     ) {
-                        DayEditorView(day: $day)
+                        DayEditorView(
+                            day: $day, filterExerciseNameSuggestions: viewModel.filteredExerciseNameSuggestions
+                        )
                     }
                 }
                     .onDelete { viewModel.handleDeleteDay(at: $0) }
@@ -104,7 +106,12 @@ struct ProgramEditorView: View {
     NavigationStack {
         ProgramEditorView(
             viewModel: ProgramEditorViewModel(
-                program: Program(name: "Push Pull Legs"), programService: PreviewSupport.makeProgramService()
+                program: Program(name: "Push Pull Legs"),
+                programService: PreviewSupport.makeProgramService(),
+                exerciseNameSuggestions: [
+                    "Bench Press",
+                    "Squat"
+                ]
             ) {
                 // Previews don't reload a program list, so there's nothing to do on save.
             }

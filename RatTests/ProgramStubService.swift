@@ -13,6 +13,7 @@ actor ProgramStubService: ProgramService {
 
     private var deleteError: Error?
     private var fetchError: Error?
+    private var fetchExerciseNamesError: Error?
     private var saveError: Error?
 
     // MARK: - Methods
@@ -27,6 +28,10 @@ actor ProgramStubService: ProgramService {
 
     func setFetchError(_ error: Error?) {
         fetchError = error
+    }
+
+    func setFetchExerciseNamesError(_ error: Error?) {
+        fetchExerciseNamesError = error
     }
 
     func setSaveError(_ error: Error?) {
@@ -44,11 +49,12 @@ actor ProgramStubService: ProgramService {
         deletedIDs.append(id)
     }
 
-    func fetchPrograms() throws -> [Program] {
-        if let fetchError {
-            throw fetchError
-        }
-        return programs.sorted { $0.name < $1.name }
+    nonisolated func fetchExerciseNames() async throws -> [String] {
+        try await isolatedFetchExerciseNames()
+    }
+
+    nonisolated func fetchPrograms() async throws -> [Program] {
+        try await isolatedFetchPrograms()
     }
 
     func save(_ program: Program) throws {
@@ -58,6 +64,27 @@ actor ProgramStubService: ProgramService {
 
         programs.removeAll { $0.id == program.id }
         programs.append(program)
+    }
+
+    // MARK: Private methods
+
+    private func isolatedFetchExerciseNames() throws -> [String] {
+        if let fetchExerciseNamesError {
+            throw fetchExerciseNamesError
+        }
+        return Set(
+            programs.flatMap {
+                $0.dayTemplates.flatMap { $0.exerciseTemplates.map(\.name) }
+            }
+        )
+            .sorted()
+    }
+
+    private func isolatedFetchPrograms() throws -> [Program] {
+        if let fetchError {
+            throw fetchError
+        }
+        return programs.sorted { $0.name < $1.name }
     }
 
 }

@@ -10,10 +10,14 @@ protocol ProgramService: Actor {
     /// - Parameter id: The identifier of the program to delete.
     /// - Throws: An error if the change couldn't be persisted.
     func delete(programWithID id: UUID) throws
+    /// Fetches the distinct exercise names used across all programs, sorted alphabetically.
+    /// - Returns: The distinct exercise names.
+    /// - Throws: An error if the fetch failed.
+    nonisolated func fetchExerciseNames() async throws -> [String]
     /// Fetches all persisted programs, sorted by name.
     /// - Returns: The persisted programs.
     /// - Throws: An error if the fetch failed.
-    func fetchPrograms() throws -> [Program]
+    nonisolated func fetchPrograms() async throws -> [Program]
     /// Persists a program, replacing any existing program with the same identifier.
     /// - Parameter program: The program to persist.
     /// - Throws: An error if the change couldn't be persisted.
@@ -51,11 +55,18 @@ actor ProgramPersistenceService: ProgramService {
         try context.save()
     }
 
-    func fetchPrograms() throws -> [Program] {
+    nonisolated func fetchExerciseNames() async throws -> [String] {
+        let context = ModelContext(container)
+        let descriptor = FetchDescriptor<ExerciseTemplateEntity>()
+
+        return Set(try context.fetch(descriptor).map(\.name)).sorted()
+    }
+
+    nonisolated func fetchPrograms() async throws -> [Program] {
         let context = ModelContext(container)
         let descriptor = FetchDescriptor<ProgramEntity>(sortBy: [SortDescriptor(\.name)])
 
-        return try context.fetch(descriptor).map(makeDomain(entity:))
+        return try context.fetch(descriptor).map(Self.makeDomain(entity:))
     }
 
     func save(_ program: Program) throws {
@@ -70,7 +81,7 @@ actor ProgramPersistenceService: ProgramService {
 
     // MARK: Private methods
 
-    private func makeDomain(entity: ProgramEntity) -> Program {
+    private static func makeDomain(entity: ProgramEntity) -> Program {
         Program(
             name: entity.name,
             dayTemplates: entity.dayTemplates.sorted { $0.position < $1.position }.map(makeDomain(entity:)),
@@ -78,7 +89,7 @@ actor ProgramPersistenceService: ProgramService {
         )
     }
 
-    private func makeDomain(entity: DayTemplateEntity) -> DayTemplate {
+    private static func makeDomain(entity: DayTemplateEntity) -> DayTemplate {
         DayTemplate(
             name: entity.name,
             position: entity.position,
@@ -87,7 +98,7 @@ actor ProgramPersistenceService: ProgramService {
         )
     }
 
-    private func makeDomain(entity: ExerciseTemplateEntity) -> ExerciseTemplate {
+    private static func makeDomain(entity: ExerciseTemplateEntity) -> ExerciseTemplate {
         ExerciseTemplate(
             name: entity.name,
             position: entity.position,
@@ -97,7 +108,7 @@ actor ProgramPersistenceService: ProgramService {
         )
     }
 
-    private func makeDomain(entity: SetTemplateEntity) -> SetTemplate {
+    private static func makeDomain(entity: SetTemplateEntity) -> SetTemplate {
         SetTemplate(
             kind: entity.kind,
             targetReps: entity.targetReps,

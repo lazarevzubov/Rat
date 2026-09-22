@@ -68,6 +68,37 @@ final class ProgramEditorUITests: XCTestCase {
         )
     }
 
+    func testAddExercise_tappingSuggestion_fillsNameFromPreviousProgram() {
+        let app = XCUIApplication.launchedForTesting()
+        addProgramWithExercise(in: app, programName: "Push Pull Legs", exerciseName: "Bench Press")
+
+        app.buttons["Add Program"].tap()
+
+        let nameField = app.textFields["Program Name"]
+        nameField.tap()
+        nameField.typeText("Upper Lower")
+
+        app.buttons["Add Day"].tap()
+        app.buttons["Untitled Day"].tap()
+
+        app.buttons["Add Exercise"].tap()
+        app.buttons["Untitled Exercise"].tap()
+
+        let exerciseNameField = app.textFields["Exercise Name"]
+        exerciseNameField.tap()
+        exerciseNameField.typeText("Bench")
+
+        let suggestion = app.buttons["Bench Press"]
+        XCTAssertTrue(
+            suggestion.waitForExistence(timeout: 5.0), "A previously used matching exercise name is suggested."
+        )
+        suggestion.tap()
+
+        XCTAssertEqual(
+            exerciseNameField.value as? String, "Bench Press", "Tapping the suggestion fills the field with it."
+        )
+    }
+
     func testDeleteProgram_removesItFromList() {
         let app = XCUIApplication.launchedForTesting()
 
@@ -86,6 +117,34 @@ final class ProgramEditorUITests: XCTestCase {
         XCTAssertFalse(
             app.staticTexts["Push Pull Legs"].waitForExistence(timeout: 2.0),
             "The deleted program no longer appears in the list."
+        )
+    }
+
+    // MARK: Private methods
+
+    private func addProgramWithExercise(in app: XCUIApplication, programName: String, exerciseName: String) {
+        app.buttons["Add Program"].tap()
+
+        let nameField = app.textFields["Program Name"]
+        nameField.tap()
+        nameField.typeText(programName)
+
+        app.buttons["Add Day"].tap()
+        app.buttons["Untitled Day"].tap()
+
+        app.buttons["Add Exercise"].tap()
+        app.buttons["Untitled Exercise"].tap()
+
+        let exerciseNameField = app.textFields["Exercise Name"]
+        exerciseNameField.tap()
+        exerciseNameField.typeText(exerciseName)
+
+        app.navigationBars[exerciseName].buttons.element(boundBy: 0).tap()
+        app.navigationBars["New Day"].buttons.element(boundBy: 0).tap()
+        app.buttons["Save"].tap()
+
+        XCTAssertTrue(
+            app.staticTexts[programName].waitForExistence(timeout: 5.0), "The saved program appears in the list."
         )
     }
 

@@ -29,8 +29,8 @@ Native iOS/iPadOS gym workout tracker (replacement for a paper notebook), siblin
 - ✅ Program list/editor UI (full CRUD for programs → days → exercises → sets), `RatUITests` target.
 - ✅ Workout session persistence (`LoggedExercise`/`LoggedSet`/`WorkoutSession` domain models, `WorkoutSessionService`).
 - ✅ Active workout screen (`ActiveWorkoutView`/`ActiveWorkoutViewModel`, "Start Workout" entry point from the program list, increase-next-time banner).
+- ✅ Exercise-name autocomplete (`ProgramService.fetchExerciseNames()`, suggestions filtered in `ProgramEditorViewModel`, shown in `ExerciseEditorView`).
 
 ## Not yet built
 
-- Exercise-name autocomplete sourced from previously used names.
 - Stats/progression charts (post-v1).

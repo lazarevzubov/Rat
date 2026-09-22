@@ -20,7 +20,7 @@ struct DayEditorView: View {
                             ? "Untitled Exercise"
                             : exercise.name
                     ) {
-                        ExerciseEditorView(exercise: $exercise)
+                        ExerciseEditorView(exercise: $exercise, filterNameSuggestions: filterExerciseNameSuggestions)
                     }
                 }
                     .onDelete(perform: { day.deleteExercise(at: $0) })
@@ -45,26 +45,25 @@ struct DayEditorView: View {
 
     // MARK: Private properties
 
+    private let filterExerciseNameSuggestions: (String) -> [String]
     @Binding
     private var day: DayTemplate
-
-    @FocusState
-    private var focusedField: Field?
-
-    /// A full-screen, invisible tap target placed behind the form, so tapping a blank area between rows
-    /// dismisses the keyboard—placed *behind* rather than wrapping the form so it doesn't intercept taps
-    /// meant for the form's own buttons and navigation links.
     private var dismissFocusBackground: some View {
         Color.clear
             .contentShape(Rectangle())
             .onTapGesture { focusedField = nil }
     }
+    @FocusState
+    private var focusedField: Field?
 
     // MARK: - Initialization
 
     /// Creates a day editor view.
-    /// - Parameter day: A binding to the day template being edited.
-    init(day: Binding<DayTemplate>) {
+    /// - Parameters:
+    ///   - day: A binding to the day template being edited.
+    ///   - filterExerciseNameSuggestions: Filters autocomplete suggestions down to those matching a partially-typed exercise name.
+    init(day: Binding<DayTemplate>, filterExerciseNameSuggestions: @escaping (String) -> [String]) {
+        self.filterExerciseNameSuggestions = filterExerciseNameSuggestions
         _day = day
     }
 
@@ -84,6 +83,12 @@ struct DayEditorView: View {
     var day = DayTemplate(name: "Push", position: 0)
 
     NavigationStack {
-        DayEditorView(day: $day)
+        DayEditorView(day: $day) { name in
+            [
+                "Bench Press",
+                "Squat"
+            ]
+                .filter { $0.localizedStandardContains(name) }
+        }
     }
 }

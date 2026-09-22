@@ -29,6 +29,16 @@ struct ExerciseEditorView: View {
                 TextField("Exercise Name", text: $exercise.name)
                     .focused($focusedField, equals: .name)
             }
+            if focusedField == .name {
+                let nameSuggestions = filterNameSuggestions(exercise.name)
+                if !nameSuggestions.isEmpty {
+                    Section("Suggestions") {
+                        ForEach(nameSuggestions, id: \.self) { suggestion in
+                            Button(suggestion) { exercise.name = suggestion }
+                        }
+                    }
+                }
+            }
             Section("Working Max") {
                 HStack {
                     TextField("Max", value: $exercise.max, format: .number)
@@ -67,6 +77,7 @@ struct ExerciseEditorView: View {
 
     // MARK: Private properties
 
+    private let filterNameSuggestions: (String) -> [String]
     private var dismissFocusBackground: some View {
         Color.clear
             .contentShape(Rectangle())
@@ -80,8 +91,11 @@ struct ExerciseEditorView: View {
     // MARK: - Initialization
 
     /// Creates an exercise editor view.
-    /// - Parameter exercise: A binding to the exercise template being edited.
-    init(exercise: Binding<ExerciseTemplate>) {
+    /// - Parameters:
+    ///   - exercise: A binding to the exercise template being edited.
+    ///   - filterNameSuggestions: Filters autocomplete suggestions down to those matching a partially-typed exercise name.
+    init(exercise: Binding<ExerciseTemplate>, filterNameSuggestions: @escaping (String) -> [String]) {
+        self.filterNameSuggestions = filterNameSuggestions
         _exercise = exercise
     }
 
@@ -100,6 +114,12 @@ struct ExerciseEditorView: View {
     )
 
     NavigationStack {
-        ExerciseEditorView(exercise: $exercise)
+        ExerciseEditorView(exercise: $exercise) { name in
+            [
+                "Bench Press",
+                "Squat"
+            ]
+                .filter { $0.localizedStandardContains(name) }
+        }
     }
 }

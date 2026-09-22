@@ -8,6 +8,8 @@ final class ProgramEditorViewModel {
 
     // MARK: - Properties
 
+    /// The distinct exercise names used across all programs, offered as autocomplete suggestions when editing an exercise's name.
+    let exerciseNameSuggestions: [String]
     /// Set to `true` once the program has been saved, telling the view it should dismiss itself.
     private(set) var didSave = false
     /// The program being edited, or a fresh, unsaved `Program`.
@@ -26,10 +28,17 @@ final class ProgramEditorViewModel {
     /// - Parameters:
     ///   - program: The program to edit, or a fresh `Program` to create a new one.
     ///   - programService: The service used to persist the program.
+    ///   - exerciseNameSuggestions: The distinct exercise names used across all programs, for autocomplete.
     ///   - onSave: Awaited after the program has been successfully saved, before `didSave` is set.
-    init(program: Program, programService: ProgramService, onSave: @escaping () async -> Void) {
+    init(
+        program: Program,
+        programService: ProgramService,
+        exerciseNameSuggestions: [String],
+        onSave: @escaping () async -> Void
+    ) {
         self.program = program
         self.programService = programService
+        self.exerciseNameSuggestions = exerciseNameSuggestions
         self.onSave = onSave
     }
 
@@ -57,6 +66,25 @@ final class ProgramEditorViewModel {
     ///   - destination: The offset to move the days to.
     func handleMoveDay(from source: IndexSet, to destination: Int) {
         program.moveDay(from: source, to: destination)
+    }
+
+    /// Filters `exerciseNameSuggestions` down to those matching the given, partially-typed exercise name.
+    /// - Parameter name: The exercise name currently being typed.
+    /// - Returns: Up to 5 suggestions containing `name`, excluding one identical to it.
+    func filteredExerciseNameSuggestions(matching name: String) -> [String] {
+        let trimmedName = name.trimmingCharacters(in: .whitespaces)
+        guard !trimmedName.isEmpty else {
+            return []
+        }
+
+        return Array(
+            exerciseNameSuggestions
+                .filter {
+                    $0.localizedStandardContains(trimmedName)
+                        && ($0.localizedCaseInsensitiveCompare(trimmedName) != .orderedSame)
+                }
+                .prefix(5)
+        )
     }
 
     /// Handles a tap on the Save button.

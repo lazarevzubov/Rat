@@ -68,6 +68,45 @@ struct ProgramPersistenceServiceTests {
     }
 
     @Test
+    func fetchExerciseNames_returnsEmpty_initially() async throws {
+        let service = try makeService()
+        let names = try await service.fetchExerciseNames()
+
+        #expect(names.isEmpty, "No exercise names are persisted initially.")
+    }
+
+    @Test
+    func fetchExerciseNames_returnsDistinctSortedNames_acrossPrograms() async throws {
+        let service = try makeService()
+
+        try await service.save(makeProgram())
+        try await service.save(
+            Program(
+                name: "Upper Lower",
+                dayTemplates: [
+                    DayTemplate(
+                        name: "Upper",
+                        position: 0,
+                        exerciseTemplates: [
+                            ExerciseTemplate(name: "Bench Press", position: 0, max: 100.0),
+                            ExerciseTemplate(name: "Overhead Press", position: 1, max: 60.0)
+                        ]
+                    )
+                ]
+            )
+        )
+
+        let names = try await service.fetchExerciseNames()
+        #expect(
+            names == [
+                "Bench Press",
+                "Overhead Press"
+            ],
+            "Names are deduplicated across programs and sorted."
+        )
+    }
+
+    @Test
     func delete_removesProgram_whenIDMatches() async throws {
         let service = try makeService()
         let program = Program(name: "Push Pull Legs")

@@ -24,6 +24,7 @@ struct ProgramEditorView: View {
                             day: $day, filterExerciseNameSuggestions: viewModel.filteredExerciseNameSuggestions
                         )
                     }
+                        .simultaneousGesture(TapGesture().onEnded { focusedField = nil })
                 }
                     .onDelete { viewModel.handleDeleteDay(at: $0) }
                     .onMove { viewModel.handleMoveDay(from: $0, to: $1) }

@@ -99,6 +99,27 @@ final class ProgramEditorUITests: XCTestCase {
         )
     }
 
+    func testTappingDayRow_dismissesProgramNameKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+
+        app.buttons["Add Program"].tap()
+
+        let nameField = app.textFields["Program Name"]
+        nameField.tap()
+        nameField.typeText("Push Pull Legs")
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Typing into the name field shows the keyboard.")
+
+        app.buttons["Add Day"].tap()
+        app.buttons["Untitled Day"].tap()
+
+        wait(
+            for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: keyboard)],
+            timeout: 5.0
+        )
+    }
+
     func testExerciseMax_editingFromZero_doesNotAppendToTheZero() {
         let app = XCUIApplication.launchedForTesting()
 

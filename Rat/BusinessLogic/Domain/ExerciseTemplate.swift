@@ -37,7 +37,9 @@ struct ExerciseTemplate: Identifiable, Sendable {
 
     /// Appends a new working set at the end of `setTemplates`.
     mutating func addSet() {
-        setTemplates.append(SetTemplate(kind: .working, targetReps: 5, position: setTemplates.count, percentOfMax: 100))
+        setTemplates.append(
+            SetTemplate(kind: .working, targetReps: 10, position: setTemplates.count, percentOfMax: 100)
+        )
     }
 
     /// Removes the sets at the given offsets, then renumbers the remaining sets' positions.

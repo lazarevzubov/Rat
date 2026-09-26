@@ -22,6 +22,7 @@ struct DayEditorView: View {
                     ) {
                         ExerciseEditorView(exercise: $exercise, filterNameSuggestions: filterExerciseNameSuggestions)
                     }
+                        .simultaneousGesture(TapGesture().onEnded { focusedField = nil })
                 }
                     .onDelete(perform: { day.deleteExercise(at: $0) })
                     .onMove(perform: { day.moveExercise(from: $0, to: $1) })

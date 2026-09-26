@@ -98,6 +98,14 @@ struct ProgramEditingTests {
     }
 
     @Test
+    func addSet_appendsWorkingSet_withTenTargetReps() {
+        var exercise = ExerciseTemplate(name: "Bench Press", position: 0, max: 100)
+        exercise.addSet()
+
+        #expect(exercise.setTemplates.last?.targetReps == 10, "The new set defaults to 10 target reps.")
+    }
+
+    @Test
     func setKind_toWarmUp_clearsPercentOfMaxAndDefaultsWarmUpWeight() {
         var set = SetTemplate(kind: .working, targetReps: 5, position: 0, percentOfMax: 80)
         set.setKind(to: .warmUp)

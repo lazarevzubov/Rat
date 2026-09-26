@@ -26,7 +26,9 @@ struct DayEditorView: View {
                 }
                     .onDelete(perform: { day.deleteExercise(at: $0) })
                     .onMove(perform: { day.moveExercise(from: $0, to: $1) })
-                Button("Add Exercise", systemImage: "plus") { day.addExercise() }
+                Button("Add Exercise", systemImage: "plus") {
+                    withAnimation { day.addExercise() }
+                }
             }
         }
             .background(dismissFocusBackground)

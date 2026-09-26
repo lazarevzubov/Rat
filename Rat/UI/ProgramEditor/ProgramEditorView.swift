@@ -28,7 +28,9 @@ struct ProgramEditorView: View {
                 }
                     .onDelete { viewModel.handleDeleteDay(at: $0) }
                     .onMove { viewModel.handleMoveDay(from: $0, to: $1) }
-                Button("Add Day", systemImage: "plus") { viewModel.handleAddDayButtonTap() }
+                Button("Add Day", systemImage: "plus") {
+                    withAnimation { viewModel.handleAddDayButtonTap() }
+                }
             }
         }
             .background(dismissFocusBackground)

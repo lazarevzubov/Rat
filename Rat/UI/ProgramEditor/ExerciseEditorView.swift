@@ -57,7 +57,9 @@ struct ExerciseEditorView: View {
                 }
                     .onDelete { exercise.deleteSet(at: $0) }
                     .onMove { exercise.moveSet(from: $0, to: $1) }
-                Button("Add Set", systemImage: "plus") { exercise.addSet() }
+                Button("Add Set", systemImage: "plus") {
+                    withAnimation { exercise.addSet() }
+                }
             }
         }
             .background(dismissFocusBackground)

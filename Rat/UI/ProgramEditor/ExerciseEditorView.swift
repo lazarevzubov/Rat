@@ -41,7 +41,7 @@ struct ExerciseEditorView: View {
             }
             Section("Working Max") {
                 HStack {
-                    TextField("Max", value: $exercise.max, format: .number)
+                    TextField("Max", value: maxBinding, format: .number)
                         .focused($focusedField, equals: .max)
                         .keyboardType(.decimalPad)
                     Text("kg")
@@ -77,6 +77,7 @@ struct ExerciseEditorView: View {
 
     // MARK: Private properties
 
+    private let fieldValueStrategy: NumberFieldValueStrategy
     private let filterNameSuggestions: (String) -> [String]
     private var dismissFocusBackground: some View {
         Color.clear
@@ -87,6 +88,11 @@ struct ExerciseEditorView: View {
     private var exercise: ExerciseTemplate
     @FocusState
     private var focusedField: Field?
+    private var maxBinding: Binding<Double?> {
+        Binding { fieldValueStrategy.displayedValue(for: exercise.max, isFocused: focusedField == .max) } set: {
+            exercise.max = $0 ?? 0
+        }
+    }
 
     // MARK: - Initialization
 
@@ -94,8 +100,15 @@ struct ExerciseEditorView: View {
     /// - Parameters:
     ///   - exercise: A binding to the exercise template being edited.
     ///   - filterNameSuggestions: Filters autocomplete suggestions down to those matching a partially-typed exercise name.
-    init(exercise: Binding<ExerciseTemplate>, filterNameSuggestions: @escaping (String) -> [String]) {
+    ///   - fieldValueStrategy: Decides what the max field should currently display.
+    init(
+        exercise: Binding<ExerciseTemplate>,
+        filterNameSuggestions: @escaping (String) -> [String],
+        fieldValueStrategy: NumberFieldValueStrategy = NumberFieldValueStrategy()
+    ) {
         self.filterNameSuggestions = filterNameSuggestions
+        self.fieldValueStrategy = fieldValueStrategy
+
         _exercise = exercise
     }
 

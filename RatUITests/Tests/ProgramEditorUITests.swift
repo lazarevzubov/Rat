@@ -99,6 +99,32 @@ final class ProgramEditorUITests: XCTestCase {
         )
     }
 
+    func testExerciseMax_editingFromZero_doesNotAppendToTheZero() {
+        let app = XCUIApplication.launchedForTesting()
+
+        app.buttons["Add Program"].tap()
+
+        let nameField = app.textFields["Program Name"]
+        nameField.tap()
+        nameField.typeText("Push Pull Legs")
+
+        app.buttons["Add Day"].tap()
+        app.buttons["Untitled Day"].tap()
+
+        app.buttons["Add Exercise"].tap()
+        app.buttons["Untitled Exercise"].tap()
+
+        let maxField = app.textFields["Max"]
+        maxField.tap()
+        maxField.typeText("7")
+
+        XCTAssertEqual(
+            maxField.value as? String,
+            "7",
+            "Editing the untouched, zero-valued field starts it empty rather than appending after the displayed 0."
+        )
+    }
+
     func testDeleteProgram_removesItFromList() {
         let app = XCUIApplication.launchedForTesting()
 

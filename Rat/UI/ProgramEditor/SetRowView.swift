@@ -20,7 +20,7 @@ struct SetRowView: View {
             if set.kind == .warmUp {
                 HStack {
                     Text("Weight")
-                    TextField("Weight", value: warmUpWeightBinding, format: .number)
+                    TextField("Weight", value: clearableWarmUpWeightBinding, format: .number)
                         .focused(focusedField, equals: .setWeight(set.id))
                         .keyboardType(.decimalPad)
                     Text("kg")
@@ -32,7 +32,7 @@ struct SetRowView: View {
             } else {
                 HStack {
                     Text("% of Max")
-                    TextField("% of Max", value: percentOfMaxBinding, format: .number)
+                    TextField("% of Max", value: clearablePercentOfMaxBinding, format: .number)
                         .focused(focusedField, equals: .setWeight(set.id))
                         .keyboardType(.numberPad)
                     if let suggestedWeight = weightSuggestionModel.suggestedWeight(for: set, exerciseMax: exerciseMax) {
@@ -50,8 +50,19 @@ struct SetRowView: View {
     // MARK: Private properties
 
     private let exerciseMax: Double
+    private let fieldValueStrategy: NumberFieldValueStrategy
     private let focusedField: FocusState<ExerciseEditorView.Field?>.Binding
     private let weightSuggestionModel = WeightSuggestionModel()
+    private var clearablePercentOfMaxBinding: Binding<Int?> {
+        Binding {
+            fieldValueStrategy.displayedValue(for: percentOfMaxBinding.wrappedValue, isFocused: weightFieldFocused)
+        } set: { percentOfMaxBinding.wrappedValue = $0 ?? 0 }
+    }
+    private var clearableWarmUpWeightBinding: Binding<Double?> {
+        Binding {
+            fieldValueStrategy.displayedValue(for: warmUpWeightBinding.wrappedValue, isFocused: weightFieldFocused)
+        } set: { warmUpWeightBinding.wrappedValue = $0 ?? 0 }
+    }
     private var kindBinding: Binding<SetKind> {
         Binding { set.kind } set: { set.setKind(to: $0) }
     }
@@ -71,6 +82,7 @@ struct SetRowView: View {
     private var warmUpWeightBinding: Binding<Double> {
         Binding { set.warmUpWeight ?? 0 } set: { set.warmUpWeight = $0 }
     }
+    private var weightFieldFocused: Bool { focusedField.wrappedValue == .setWeight(set.id) }
 
     // MARK: - Initialization
 
@@ -80,11 +92,18 @@ struct SetRowView: View {
     ///   - exerciseMax: The exercise's current working max in kg, used to suggest a weight.
     ///   - focusedField: The enclosing exercise editor's shared focus state, so tapping elsewhere on that
     ///   screen—including another set's row—dismisses this row's keyboard too.
-    init(set: Binding<SetTemplate>, exerciseMax: Double, focusedField: FocusState<ExerciseEditorView.Field?>.Binding) {
-        _set = set
-
+    ///   - fieldValueStrategy: Decides what the weight/percent fields should currently display.
+    init(
+        set: Binding<SetTemplate>,
+        exerciseMax: Double,
+        focusedField: FocusState<ExerciseEditorView.Field?>.Binding,
+        fieldValueStrategy: NumberFieldValueStrategy = NumberFieldValueStrategy()
+    ) {
         self.exerciseMax = exerciseMax
         self.focusedField = focusedField
+        self.fieldValueStrategy = fieldValueStrategy
+
+        _set = set
     }
 
 }

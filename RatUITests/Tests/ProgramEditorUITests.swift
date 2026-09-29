@@ -19,10 +19,29 @@ final class ProgramEditorUITests: XCTestCase {
         nameField.tap()
         nameField.typeText("Push Pull Legs")
 
-        app.buttons["Save"].tap()
+        app.buttons["Done"].tap()
         XCTAssertTrue(
             app.staticTexts["Push Pull Legs"].waitForExistence(timeout: 5.0),
-            "The saved program appears in the list."
+            "The autosaved program appears in the list."
+        )
+    }
+
+    func testRenameExistingProgram_navigatingBackWithoutTappingAnything_persistsRename() {
+        let app = XCUIApplication.launchedForTesting()
+        addProgramWithExercise(in: app, programName: "Push Pull Legs", exerciseName: "Bench Press")
+
+        app.staticTexts["Push Pull Legs"].tap()
+
+        let nameField = app.textFields["Program Name"]
+        nameField.tap()
+        deleteText(in: nameField, previousLength: "Push Pull Legs".count)
+        nameField.typeText("Upper Lower")
+
+        app.navigationBars["Upper Lower"].buttons.element(boundBy: 0).tap()
+
+        XCTAssertTrue(
+            app.staticTexts["Upper Lower"].waitForExistence(timeout: 5.0),
+            "Editing an existing program autosaves the rename without any Save button."
         )
     }
 
@@ -60,11 +79,11 @@ final class ProgramEditorUITests: XCTestCase {
 
         app.navigationBars["Bench Press"].buttons.element(boundBy: 0).tap()
         app.navigationBars["Push"].buttons.element(boundBy: 0).tap()
-        app.buttons["Save"].tap()
+        app.buttons["Done"].tap()
 
         XCTAssertTrue(
             app.staticTexts["Push Pull Legs"].waitForExistence(timeout: 5.0),
-            "The saved program appears in the list."
+            "The autosaved program appears in the list."
         )
     }
 
@@ -155,7 +174,7 @@ final class ProgramEditorUITests: XCTestCase {
         nameField.tap()
         nameField.typeText("Push Pull Legs")
 
-        app.buttons["Save"].tap()
+        app.buttons["Done"].tap()
         XCTAssertTrue(app.staticTexts["Push Pull Legs"].waitForExistence(timeout: 5.0))
 
         app.staticTexts["Push Pull Legs"].swipeLeft()
@@ -168,6 +187,10 @@ final class ProgramEditorUITests: XCTestCase {
     }
 
     // MARK: Private methods
+
+    private func deleteText(in field: XCUIElement, previousLength: Int) {
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: previousLength))
+    }
 
     private func addProgramWithExercise(in app: XCUIApplication, programName: String, exerciseName: String) {
         app.buttons["Add Program"].tap()
@@ -188,10 +211,10 @@ final class ProgramEditorUITests: XCTestCase {
 
         app.navigationBars[exerciseName].buttons.element(boundBy: 0).tap()
         app.navigationBars["New Day"].buttons.element(boundBy: 0).tap()
-        app.buttons["Save"].tap()
+        app.buttons["Done"].tap()
 
         XCTAssertTrue(
-            app.staticTexts[programName].waitForExistence(timeout: 5.0), "The saved program appears in the list."
+            app.staticTexts[programName].waitForExistence(timeout: 5.0), "The autosaved program appears in the list."
         )
     }
 

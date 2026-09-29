@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Edits a single program's name and day templates, persisting changes on save.
+/// Edits a single program's name and day templates, autosaving edits as they're made.
 struct ProgramEditorView: View {
 
     // MARK: - Properties
@@ -40,20 +40,13 @@ struct ProgramEditorView: View {
                     : viewModel.program.name
             )
             .onDisappear { focusedField = nil }
-            .onChange(of: viewModel.didSave) {
-                if $1 {
-                    dismiss()
-                }
-            }
             .toolbar {
-                ToolbarItemGroup(placement: .cancellationAction) {
-                    Button("Cancel", role: .cancel) { dismiss() }
+                ToolbarItem(placement: .topBarTrailing) {
                     EditButton()
                         .accessibilityLabel("Reorder or Delete Days")
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { viewModel.handleSaveButtonTap() }
-                        .disabled(viewModel.program.name.trimmingCharacters(in: .whitespaces).isEmpty)
+                    Button("Done") { dismiss() }
                 }
             }
             .alert("Couldn't save program", isPresented: errorBinding) {

@@ -155,8 +155,8 @@ struct ProgramListViewModelTests {
         let program = Program(name: "Push Pull Legs")
         let editorViewModel = viewModel.makeProgramEditorViewModel(program: program)
 
-        await editorViewModel.handleSaveButtonTap().value
-        #expect(viewModel.programs.map(\.id) == [program.id], "Saving in the editor reloads this list.")
+        await editorViewModel.handleProgramChanged().value
+        #expect(viewModel.programs.map(\.id) == [program.id], "Autosaving in the editor reloads this list.")
     }
 
     @Test

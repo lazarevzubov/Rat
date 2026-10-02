@@ -165,8 +165,9 @@ struct ActiveWorkoutViewModelTests {
         let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: service)
 
         await viewModel.handleAppear()
-        await viewModel.handleSaveButtonTap().value
+        viewModel.handleSaveButtonTap()
 
+        await waitFor { await !service.savedSessions.isEmpty }
         #expect(await service.savedSessions.map(\.id) == [viewModel.session?.id], "The session is persisted.")
     }
 
@@ -176,9 +177,9 @@ struct ActiveWorkoutViewModelTests {
         let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: WorkoutSessionStubService())
 
         await viewModel.handleAppear()
-        await viewModel.handleSaveButtonTap().value
+        viewModel.handleSaveButtonTap()
 
-        #expect(viewModel.didSave, "A successful save tells the view it should dismiss.")
+        await waitFor { viewModel.didSave }
     }
 
     @Test
@@ -190,7 +191,9 @@ struct ActiveWorkoutViewModelTests {
 
         let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: service)
         await viewModel.handleAppear()
-        await viewModel.handleSaveButtonTap().value
+
+        viewModel.handleSaveButtonTap()
+        await waitFor { viewModel.presentedError != nil }
 
         #expect(viewModel.presentedError is TestError, "A failed save records the error for the view to present.")
     }
@@ -204,7 +207,9 @@ struct ActiveWorkoutViewModelTests {
 
         let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: service)
         await viewModel.handleAppear()
-        await viewModel.handleSaveButtonTap().value
+
+        viewModel.handleSaveButtonTap()
+        await waitFor { viewModel.presentedError != nil }
 
         #expect(!viewModel.didSave, "A failed save doesn't tell the view to dismiss.")
     }

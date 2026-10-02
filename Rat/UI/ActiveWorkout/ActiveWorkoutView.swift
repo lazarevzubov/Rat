@@ -105,7 +105,7 @@ struct ActiveWorkoutView: View {
 #Preview {
     NavigationStack {
         ActiveWorkoutView(
-            viewModel: ActiveWorkoutViewModel(
+            viewModel: PreviewSupport.makeActiveWorkoutViewModel(
                 program: Program(
                     name: "Push Pull Legs",
                     dayTemplates: [
@@ -124,8 +124,7 @@ struct ActiveWorkoutView: View {
                             ]
                         )
                     ]
-                ),
-                workoutSessionService: PreviewSupport.makeWorkoutSessionService()
+                )
             )
         )
     }

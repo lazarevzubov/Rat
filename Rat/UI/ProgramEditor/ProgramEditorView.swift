@@ -41,12 +41,20 @@ struct ProgramEditorView: View {
             )
             .onDisappear { focusedField = nil }
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Start Workout", systemImage: "figure.run") { viewModel.handleStartWorkoutButtonTap() }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     EditButton()
                         .accessibilityLabel("Reorder or Delete Days")
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
+                }
+            }
+            .sheet(isPresented: $viewModel.startingWorkout) {
+                NavigationStack {
+                    ActiveWorkoutView(viewModel: viewModel.makeActiveWorkoutViewModel())
                 }
             }
             .alert("Couldn't save program", isPresented: errorBinding) {
@@ -101,16 +109,13 @@ struct ProgramEditorView: View {
 #Preview {
     NavigationStack {
         ProgramEditorView(
-            viewModel: ProgramEditorViewModel(
+            viewModel: PreviewSupport.makeProgramEditorViewModel(
                 program: Program(name: "Push Pull Legs"),
-                programService: PreviewSupport.makeProgramService(),
                 exerciseNameSuggestions: [
                     "Bench Press",
                     "Squat"
                 ]
-            ) {
-                // Previews don't reload a program list, so there's nothing to do on save.
-            }
+            )
         )
     }
 }

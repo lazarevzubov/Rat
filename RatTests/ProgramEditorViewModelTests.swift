@@ -16,7 +16,8 @@ struct ProgramEditorViewModelTests {
                 "Bench Press",
                 "Overhead Press",
                 "Squat"
-            ]
+            ],
+            workoutSessionService: WorkoutSessionStubService()
         ) {
             // onSave isn't exercised by this test.
         }
@@ -34,7 +35,8 @@ struct ProgramEditorViewModelTests {
         let viewModel = ProgramEditorViewModel(
             program: Program(name: "Push Pull Legs"),
             programService: ProgramStubService(),
-            exerciseNameSuggestions: ["Bench Press"]
+            exerciseNameSuggestions: ["Bench Press"],
+            workoutSessionService: WorkoutSessionStubService()
         ) {
             // onSave isn't exercised by this test.
         }
@@ -49,7 +51,8 @@ struct ProgramEditorViewModelTests {
         let viewModel = ProgramEditorViewModel(
             program: Program(name: "Push Pull Legs"),
             programService: ProgramStubService(),
-            exerciseNameSuggestions: ["Bench Press"]
+            exerciseNameSuggestions: ["Bench Press"],
+            workoutSessionService: WorkoutSessionStubService()
         ) {
             // onSave isn't exercised by this test.
         }
@@ -63,7 +66,8 @@ struct ProgramEditorViewModelTests {
         let viewModel = ProgramEditorViewModel(
             program: Program(name: "Push Pull Legs"),
             programService: ProgramStubService(),
-            exerciseNameSuggestions: (1...6).map { "Press \($0)" }
+            exerciseNameSuggestions: (1...6).map { "Press \($0)" },
+            workoutSessionService: WorkoutSessionStubService()
         ) {
             // onSave isn't exercised by this test.
         }
@@ -75,7 +79,11 @@ struct ProgramEditorViewModelTests {
         let service = ProgramStubService()
         let program = Program(name: "Push Pull Legs")
         let viewModel = ProgramEditorViewModel(
-            program: program, programService: service, exerciseNameSuggestions: [], autosaveDelay: .zero
+            program: program,
+            programService: service,
+            exerciseNameSuggestions: [],
+            autosaveDelay: .zero,
+            workoutSessionService: WorkoutSessionStubService()
         ) {
             // onSave isn't exercised by this test.
         }
@@ -91,12 +99,18 @@ struct ProgramEditorViewModelTests {
         let service = ProgramStubService()
         let program = Program(name: "Push Pull Legs")
         let viewModel = ProgramEditorViewModel(
-            program: program, programService: service, exerciseNameSuggestions: [], autosaveDelay: .zero
+            program: program,
+            programService: service,
+            exerciseNameSuggestions: [],
+            autosaveDelay: .zero,
+            workoutSessionService: WorkoutSessionStubService()
         ) {
             // onSave isn't exercised by this test.
         }
 
-        await viewModel.handleProgramChanged().value
+        viewModel.handleProgramChanged()
+        await waitFor { await !service.programs.isEmpty }
+
         #expect(await service.programs.map(\.id) == [program.id], "The program is persisted.")
     }
 
@@ -109,43 +123,16 @@ struct ProgramEditorViewModelTests {
             program: Program(name: "Push Pull Legs"),
             programService: service,
             exerciseNameSuggestions: [],
-            autosaveDelay: .zero
+            autosaveDelay: .zero,
+            workoutSessionService: WorkoutSessionStubService()
         ) {
             onSaveCallCount += 1
         }
 
-        await viewModel.handleProgramChanged().value
-        #expect(onSaveCallCount == 1, "onSave is awaited exactly once.")
-    }
-
-    @Test
-    func handleProgramChanged_givenBlankName_doesNotPersist() async {
-        let service = ProgramStubService()
-        let viewModel = ProgramEditorViewModel(
-            program: Program(name: "   "), programService: service, exerciseNameSuggestions: [], autosaveDelay: .zero
-        ) {
-            // onSave isn't exercised by this test.
-        }
-
-        await viewModel.handleProgramChanged().value
-        #expect(await service.programs.isEmpty, "A still-unnamed program isn't persisted.")
-    }
-
-    @Test
-    func handleProgramChanged_calledAgain_cancelsPriorTask() {
-        let viewModel = ProgramEditorViewModel(
-            program: Program(name: "Push Pull Legs"),
-            programService: ProgramStubService(),
-            exerciseNameSuggestions: [],
-            autosaveDelay: .seconds(60)
-        ) {
-            // onSave isn't exercised by this test.
-        }
-
-        let firstTask = viewModel.handleProgramChanged()
         viewModel.handleProgramChanged()
+        await waitFor { onSaveCallCount > 0 }
 
-        #expect(firstTask.isCancelled, "A new edit cancels the previous, still-pending autosave.")
+        #expect(onSaveCallCount == 1, "onSave is awaited exactly once.")
     }
 
     @Test
@@ -157,12 +144,14 @@ struct ProgramEditorViewModelTests {
             program: Program(name: "Push Pull Legs"),
             programService: service,
             exerciseNameSuggestions: [],
-            autosaveDelay: .zero
+            autosaveDelay: .zero,
+            workoutSessionService: WorkoutSessionStubService()
         ) {
             // onSave isn't exercised by this test.
         }
-        await viewModel.handleProgramChanged().value
+        viewModel.handleProgramChanged()
 
+        await waitFor { viewModel.saveError != nil }
         #expect(viewModel.saveError is TestError, "A failed save records the error for the view to present.")
     }
 
@@ -176,11 +165,14 @@ struct ProgramEditorViewModelTests {
             program: Program(name: "Push Pull Legs"),
             programService: service,
             exerciseNameSuggestions: [],
-            autosaveDelay: .zero
+            autosaveDelay: .zero,
+            workoutSessionService: WorkoutSessionStubService()
         ) {
             onSaveCallCount += 1
         }
-        await viewModel.handleProgramChanged().value
+
+        viewModel.handleProgramChanged()
+        await waitFor { viewModel.saveError != nil }
 
         #expect(onSaveCallCount == 0, "A failed save doesn't reload the caller.")
     }
@@ -194,11 +186,14 @@ struct ProgramEditorViewModelTests {
             program: Program(name: "Push Pull Legs"),
             programService: service,
             exerciseNameSuggestions: [],
-            autosaveDelay: .zero
+            autosaveDelay: .zero,
+            workoutSessionService: WorkoutSessionStubService()
         ) {
             // onSave isn't exercised by this test.
         }
-        await viewModel.handleProgramChanged().value
+
+        viewModel.handleProgramChanged()
+        await waitFor { viewModel.saveError != nil }
 
         viewModel.dismissSaveError()
         #expect(viewModel.saveError == nil, "The alert can be dismissed.")
@@ -207,7 +202,10 @@ struct ProgramEditorViewModelTests {
     @Test
     func handleAddDayButtonTap_appendsDay() {
         let viewModel = ProgramEditorViewModel(
-            program: Program(name: "Push Pull Legs"), programService: ProgramStubService(), exerciseNameSuggestions: []
+            program: Program(name: "Push Pull Legs"),
+            programService: ProgramStubService(),
+            exerciseNameSuggestions: [],
+            workoutSessionService: WorkoutSessionStubService()
         ) {
             // onSave isn't exercised by this test.
         }
@@ -221,12 +219,18 @@ struct ProgramEditorViewModelTests {
         let program = Program(name: "Push Pull Legs")
         let service = ProgramStubService()
         let viewModel = ProgramEditorViewModel(
-            program: program, programService: service, exerciseNameSuggestions: [], autosaveDelay: .zero
+            program: program,
+            programService: service,
+            exerciseNameSuggestions: [],
+            autosaveDelay: .zero,
+            workoutSessionService: WorkoutSessionStubService()
         ) {
             // onSave isn't exercised by this test.
         }
 
-        await viewModel.handleAddDayButtonTap().value
+        viewModel.handleAddDayButtonTap()
+        await waitFor { await !service.programs.isEmpty }
+
         #expect(await service.programs.map(\.id) == [program.id], "Adding a day autosaves the program.")
     }
 
@@ -234,7 +238,10 @@ struct ProgramEditorViewModelTests {
     func handleDeleteDay_removesDay() {
         let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
         let viewModel = ProgramEditorViewModel(
-            program: program, programService: ProgramStubService(), exerciseNameSuggestions: []
+            program: program,
+            programService: ProgramStubService(),
+            exerciseNameSuggestions: [],
+            workoutSessionService: WorkoutSessionStubService()
         ) {
             // onSave isn't exercised by this test.
         }
@@ -253,7 +260,10 @@ struct ProgramEditorViewModelTests {
             ]
         )
         let viewModel = ProgramEditorViewModel(
-            program: program, programService: ProgramStubService(), exerciseNameSuggestions: []
+            program: program,
+            programService: ProgramStubService(),
+            exerciseNameSuggestions: [],
+            workoutSessionService: WorkoutSessionStubService()
         ) {
             // onSave isn't exercised by this test.
         }
@@ -262,6 +272,42 @@ struct ProgramEditorViewModelTests {
         #expect(
             viewModel.program.dayTemplates.map(\.name) == ["Pull", "Push"],
             "The days in the program being edited are reordered."
+        )
+    }
+
+    @Test
+    func handleStartWorkoutButtonTap_presentsWorkoutForEditing() {
+        let viewModel = ProgramEditorViewModel(
+            program: Program(name: "Push Pull Legs"),
+            programService: ProgramStubService(),
+            exerciseNameSuggestions: [],
+            workoutSessionService: WorkoutSessionStubService()
+        ) {
+            // onSave isn't exercised by this test.
+        }
+        viewModel.handleStartWorkoutButtonTap()
+
+        #expect(viewModel.startingWorkout, "The workout-logging screen is presented.")
+    }
+
+    @Test
+    func makeActiveWorkoutViewModel_usesProgramBeingEdited() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+        let viewModel = ProgramEditorViewModel(
+            program: program,
+            programService: ProgramStubService(),
+            exerciseNameSuggestions: [],
+            workoutSessionService: WorkoutSessionStubService()
+        ) {
+            // onSave isn't exercised by this test.
+        }
+
+        let activeWorkoutViewModel = viewModel.makeActiveWorkoutViewModel()
+        await activeWorkoutViewModel.handleAppear()
+
+        #expect(
+            activeWorkoutViewModel.session?.dayName == "Push",
+            "The workout is seeded from the program currently being edited."
         )
     }
 

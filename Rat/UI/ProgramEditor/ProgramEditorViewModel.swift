@@ -14,6 +14,8 @@ final class ProgramEditorViewModel {
     var program: Program {
         didSet { handleProgramChanged() }
     }
+    /// Whether the workout-logging screen should be presented for the program being edited.
+    var startingWorkout = false
     /// The error from the most recent failed save, if any.
     private(set) var saveError: Error?
 
@@ -22,7 +24,8 @@ final class ProgramEditorViewModel {
     private let autosaveDelay: Duration
     private let onSave: () async -> Void
     private let programService: ProgramService
-    private var saveTask = Task<Void, Never> {}
+    private let workoutSessionService: WorkoutSessionService
+    private var saveTask: Task<Void, Never>?
 
     // MARK: - Initialization
 
@@ -33,38 +36,35 @@ final class ProgramEditorViewModel {
     ///   - exerciseNameSuggestions: The distinct exercise names used across all programs, for autocomplete.
     ///   - autosaveDelay: How long to wait after an edit before persisting (so rapid edits (e.g., typing) don't each trigger their own persistence
     ///   call.)
+    ///   - workoutSessionService: The service used to log a workout against the program being edited.
     ///   - onSave: Awaited after the program has been successfully saved.
     init(
         program: Program,
         programService: ProgramService,
         exerciseNameSuggestions: [String],
         autosaveDelay: Duration = .milliseconds(500),
+        workoutSessionService: WorkoutSessionService,
         onSave: @escaping () async -> Void
     ) {
         self.program = program
         self.programService = programService
         self.exerciseNameSuggestions = exerciseNameSuggestions
         self.autosaveDelay = autosaveDelay
+        self.workoutSessionService = workoutSessionService
         self.onSave = onSave
     }
 
     // MARK: - Methods
 
     /// Handles a tap on the Add Day button.
-    /// - Returns: The task doing the autosave work triggered by `program`'s `didSet`, so tests can await its completion.
-    @discardableResult
-    func handleAddDayButtonTap() -> Task<Void, Never> {
+    func handleAddDayButtonTap() {
         program.addDay()
-        return saveTask
     }
 
     /// Handles the days at the given offsets being deleted from the list.
     /// - Parameter offsets: The offsets, within `program.dayTemplates`, of the days to remove.
-    /// - Returns: The task doing the autosave work triggered by `program`'s `didSet`, so tests can await its completion.
-    @discardableResult
-    func handleDeleteDay(at offsets: IndexSet) -> Task<Void, Never> {
+    func handleDeleteDay(at offsets: IndexSet) {
         program.deleteDay(at: offsets)
-        return saveTask
     }
 
     /// Dismisses the current save error, if any.
@@ -72,15 +72,22 @@ final class ProgramEditorViewModel {
         saveError = nil
     }
 
+    /// Handles a tap on the Start Workout button.
+    func handleStartWorkoutButtonTap() {
+        startingWorkout = true
+    }
+
+    /// Creates a view model for logging a workout against the program being edited.
+    func makeActiveWorkoutViewModel() -> ActiveWorkoutViewModel {
+        ActiveWorkoutViewModel(program: program, workoutSessionService: workoutSessionService)
+    }
+
     /// Handles the days at the given offsets being reordered in the list.
     /// - Parameters:
     ///   - source: The offsets, within `program.dayTemplates`, of the days to move.
     ///   - destination: The offset to move the days to.
-    /// - Returns: The task doing the autosave work triggered by `program`'s `didSet`, so tests can await its completion.
-    @discardableResult
-    func handleMoveDay(from source: IndexSet, to destination: Int) -> Task<Void, Never> {
+    func handleMoveDay(from source: IndexSet, to destination: Int) {
         program.moveDay(from: source, to: destination)
-        return saveTask
     }
 
     /// Filters `exerciseNameSuggestions` down to those matching the given, partially-typed exercise name.
@@ -103,14 +110,11 @@ final class ProgramEditorViewModel {
     }
 
     /// Handles any edit to `program`, saving it after `autosaveDelay` once edits settle, unless it's still unnamed.
-    /// - Returns: The task doing the work, so tests can await its completion.
-    @discardableResult
-    func handleProgramChanged() -> Task<Void, Never> {
-        saveTask.cancel()
+    func handleProgramChanged() {
+        saveTask?.cancel()
 
         let program = program
-
-        let task = Task {
+        saveTask = Task {
             try? await Task.sleep(for: autosaveDelay)
             guard !Task.isCancelled,
                   !program.name.trimmingCharacters(in: .whitespaces).isEmpty else {
@@ -124,9 +128,6 @@ final class ProgramEditorViewModel {
                 saveError = error
             }
         }
-        saveTask = task
-
-        return task
     }
 
 }

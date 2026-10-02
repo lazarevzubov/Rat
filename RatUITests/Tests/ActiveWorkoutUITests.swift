@@ -10,18 +10,18 @@ final class ActiveWorkoutUITests: XCTestCase {
         try super.setUpWithError()
     }
 
-    func testStartWorkout_logSetAndSave_dismissesToList() {
+    func testStartWorkout_logSetAndSave_dismissesToProgramEditor() {
         let app = XCUIApplication.launchedForTesting()
         addProgramWithDayExerciseAndSet(in: app, named: "Push Pull Legs")
 
-        app.staticTexts["Push Pull Legs"].swipeRight()
+        app.staticTexts["Push Pull Legs"].tap()
         app.buttons["Start Workout"].tap()
 
         XCTAssertTrue(
             app.navigationBars["Push"].waitForExistence(timeout: 5.0), "The workout screen shows the seeded day's name."
         )
 
-        app.steppers["Reps: 5"].buttons["Increment"].tap()
+        app.steppers["Reps: 10"].buttons["Increment"].tap()
 
         let toggle = app.switches["Increase Next Time"]
         // The row also has a Stepper and a TextField, so the switch's own hit area—not the whole row—must be tapped;
@@ -31,11 +31,10 @@ final class ActiveWorkoutUITests: XCTestCase {
 
         app.buttons["Save"].tap()
         XCTAssertTrue(
-            app.navigationBars["Programs"].waitForExistence(timeout: 5.0),
-            "Saving the workout dismisses back to the program list."
+            app.navigationBars["Push Pull Legs"].waitForExistence(timeout: 5.0),
+            "Saving the workout dismisses back to the program editor it was started from."
         )
 
-        app.staticTexts["Push Pull Legs"].swipeRight()
         app.buttons["Start Workout"].tap()
         XCTAssertTrue(app.navigationBars["Push"].waitForExistence(timeout: 5.0), "The day cycles back around to Push.")
         XCTAssertTrue(
@@ -78,7 +77,7 @@ final class ActiveWorkoutUITests: XCTestCase {
 
         app.navigationBars["Bench Press"].buttons.element(boundBy: 0).tap()
         app.navigationBars["Push"].buttons.element(boundBy: 0).tap()
-        app.buttons["Save"].tap()
+        app.buttons["Done"].tap()
 
         XCTAssertTrue(app.staticTexts[name].waitForExistence(timeout: 5.0), "The saved program appears in the list.")
     }

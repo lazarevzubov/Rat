@@ -10,8 +10,6 @@ final class ProgramListViewModel {
 
     /// A program being created, presented for editing until it's saved or discarded.
     var newProgram: Program?
-    /// The program a workout is being started for, presented until the workout is dismissed.
-    var programStartingWorkout: Program?
     /// The distinct exercise names used across all programs, offered as autocomplete suggestions when editing an exercise's name.
     private(set) var exerciseNameSuggestions = [String]()
     /// The error from the most recent failed load, if any.
@@ -42,23 +40,14 @@ final class ProgramListViewModel {
         newProgram = Program(name: "")
     }
 
-    /// Handles a tap on the Start Workout swipe action for the given program.
-    /// - Parameter program: The program to work out against.
-    func handleStartWorkoutButtonTap(for program: Program) {
-        programStartingWorkout = program
-    }
-
     /// Handles the programs at the given offsets being deleted from the list.
     /// - Parameter offsets: The offsets, within `programs`, of the programs to delete.
-    /// - Returns: The task doing the persistence work, so tests can await its completion.
-    @discardableResult
-    func handleDelete(at offsets: IndexSet) -> Task<Void, Never> {
+    func handleDelete(at offsets: IndexSet) {
         let idsToDelete = offsets.map { programs[$0].id }
         programs.remove(atOffsets: offsets)
 
         let programService = programService
-
-        return Task {
+        Task {
             await withTaskGroup(of: Void.self) { group in
                 for id in idsToDelete {
                     group.addTask { try? await programService.delete(programWithID: id) }
@@ -77,20 +66,17 @@ final class ProgramListViewModel {
         await reloadProgramsAndExerciseNameSuggestions()
     }
 
-    /// Creates a view model for editing the given program, wired to reload this list once it's saved.
+    /// Creates a view model for editing the given program.
     /// - Parameter program: The program to edit, or a fresh `Program` to create a new one.
     func makeProgramEditorViewModel(program: Program) -> ProgramEditorViewModel {
         ProgramEditorViewModel(
-            program: program, programService: programService, exerciseNameSuggestions: exerciseNameSuggestions
+            program: program,
+            programService: programService,
+            exerciseNameSuggestions: exerciseNameSuggestions,
+            workoutSessionService: workoutSessionService
         ) { [weak self] in
             await self?.reloadProgramsAndExerciseNameSuggestions()
         }
-    }
-
-    /// Creates a view model for logging a workout against the given program.
-    /// - Parameter program: The program to work out against.
-    func makeActiveWorkoutViewModel(program: Program) -> ActiveWorkoutViewModel {
-        ActiveWorkoutViewModel(program: program, workoutSessionService: workoutSessionService)
     }
 
     // MARK: Private methods

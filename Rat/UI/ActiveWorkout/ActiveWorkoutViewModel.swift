@@ -61,9 +61,7 @@ final class ActiveWorkoutViewModel {
     }
 
     /// Handles a tap on the Save button.
-    /// - Returns: The task doing the work, so tests can await its completion.
-    @discardableResult
-    func handleSaveButtonTap() -> Task<Void, Never> {
+    func handleSaveButtonTap() {
         Task {
             guard let session else {
                 return

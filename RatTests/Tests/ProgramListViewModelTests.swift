@@ -99,21 +99,6 @@ struct ProgramListViewModelTests {
     }
 
     @Test
-    func handleStartWorkoutButtonTap_presentsGivenProgramForLogging() {
-        let program = Program(name: "Push Pull Legs")
-
-        let viewModel = ProgramListViewModel(
-            programService: ProgramStubService(), workoutSessionService: WorkoutSessionStubService()
-        )
-        viewModel.handleStartWorkoutButtonTap(for: program)
-
-        #expect(
-            viewModel.programStartingWorkout?.id == program.id,
-            "The tapped program is presented for logging a workout."
-        )
-    }
-
-    @Test
     func handleDelete_removesProgramLocally() async {
         let service = ProgramStubService()
 
@@ -124,7 +109,7 @@ struct ProgramListViewModelTests {
             programService: service, workoutSessionService: WorkoutSessionStubService()
         )
         await viewModel.handleAppear()
-        await viewModel.handleDelete(at: [0]).value
+        viewModel.handleDelete(at: [0])
 
         #expect(viewModel.programs.isEmpty, "The deleted program no longer appears in the list.")
     }
@@ -140,7 +125,9 @@ struct ProgramListViewModelTests {
             programService: service, workoutSessionService: WorkoutSessionStubService()
         )
         await viewModel.handleAppear()
-        await viewModel.handleDelete(at: [0]).value
+
+        viewModel.handleDelete(at: [0])
+        await waitFor { await !service.deletedIDs.isEmpty }
 
         #expect(await service.deletedIDs == [program.id], "The deleted program is removed from persistence too.")
     }
@@ -155,7 +142,9 @@ struct ProgramListViewModelTests {
         let program = Program(name: "Push Pull Legs")
         let editorViewModel = viewModel.makeProgramEditorViewModel(program: program)
 
-        await editorViewModel.handleProgramChanged().value
+        editorViewModel.handleProgramChanged()
+        await waitFor { !viewModel.programs.isEmpty }
+
         #expect(viewModel.programs.map(\.id) == [program.id], "Autosaving in the editor reloads this list.")
     }
 

@@ -106,6 +106,7 @@ struct ProgramEditorView: View {
 
 // MARK: -
 
+#if DEBUG
 #Preview {
     NavigationStack {
         ProgramEditorView(
@@ -119,3 +120,4 @@ struct ProgramEditorView: View {
         )
     }
 }
+#endif

@@ -29,6 +29,8 @@ struct ContentView: View {
 
 // MARK: -
 
+#if DEBUG
 #Preview {
     ContentView(viewModel: PreviewSupport.makeProgramListViewModel())
 }
+#endif

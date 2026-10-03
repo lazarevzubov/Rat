@@ -102,6 +102,7 @@ struct ActiveWorkoutView: View {
 
 // MARK: -
 
+#if DEBUG
 #Preview {
     NavigationStack {
         ActiveWorkoutView(
@@ -129,3 +130,4 @@ struct ActiveWorkoutView: View {
         )
     }
 }
+#endif

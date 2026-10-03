@@ -63,8 +63,10 @@ struct ProgramListView: View {
 
 // MARK: -
 
+#if DEBUG
 #Preview {
     NavigationStack {
         ProgramListView(viewModel: PreviewSupport.makeProgramListViewModel())
     }
 }
+#endif

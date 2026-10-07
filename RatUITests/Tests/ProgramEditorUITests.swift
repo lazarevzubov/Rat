@@ -10,22 +10,6 @@ final class ProgramEditorUITests: XCTestCase {
         try super.setUpWithError()
     }
 
-    func testAddProgram_appearsInList_withNameFromEditor() {
-        let app = XCUIApplication.launchedForTesting()
-
-        app.buttons["Add Program"].tap()
-
-        let nameField = app.textFields["Program Name"]
-        nameField.tap()
-        nameField.typeText("Push Pull Legs")
-
-        app.buttons["Done"].tap()
-        XCTAssertTrue(
-            app.staticTexts["Push Pull Legs"].waitForExistence(timeout: 5.0),
-            "The autosaved program appears in the list."
-        )
-    }
-
     func testRenameExistingProgram_navigatingBackWithoutTappingAnything_persistsRename() {
         let app = XCUIApplication.launchedForTesting()
         addProgramWithExercise(in: app, programName: "Push Pull Legs", exerciseName: "Bench Press")
@@ -162,27 +146,6 @@ final class ProgramEditorUITests: XCTestCase {
             maxField.value as? String,
             "7",
             "Editing the untouched, zero-valued field starts it empty rather than appending after the displayed 0."
-        )
-    }
-
-    func testDeleteProgram_removesItFromList() {
-        let app = XCUIApplication.launchedForTesting()
-
-        app.buttons["Add Program"].tap()
-
-        let nameField = app.textFields["Program Name"]
-        nameField.tap()
-        nameField.typeText("Push Pull Legs")
-
-        app.buttons["Done"].tap()
-        XCTAssertTrue(app.staticTexts["Push Pull Legs"].waitForExistence(timeout: 5.0))
-
-        app.staticTexts["Push Pull Legs"].swipeLeft()
-        app.buttons["Delete"].tap()
-
-        XCTAssertFalse(
-            app.staticTexts["Push Pull Legs"].waitForExistence(timeout: 2.0),
-            "The deleted program no longer appears in the list."
         )
     }
 

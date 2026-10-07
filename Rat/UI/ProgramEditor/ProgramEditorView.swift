@@ -40,13 +40,20 @@ struct ProgramEditorView: View {
                     : viewModel.program.name
             )
             .onDisappear { focusedField = nil }
+            .onChange(of: viewModel.program.dayTemplates.isEmpty) {
+                if $1 {
+                    editMode = .inactive
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Start Workout", systemImage: "figure.run") { viewModel.handleStartWorkoutButtonTap() }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    EditButton()
-                        .accessibilityLabel("Reorder or Delete Days")
+                if !viewModel.program.dayTemplates.isEmpty {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        EditButton()
+                            .accessibilityLabel("Reorder or Delete Days")
+                    }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
@@ -62,6 +69,7 @@ struct ProgramEditorView: View {
             } message: {
                 Text(viewModel.saveError?.localizedDescription ?? "")
             }
+            .environment(\.editMode, $editMode)
     }
 
     // MARK: Private properties
@@ -73,6 +81,8 @@ struct ProgramEditorView: View {
             .contentShape(Rectangle())
             .onTapGesture { focusedField = nil }
     }
+    @State
+    private var editMode = EditMode.inactive
     private var errorBinding: Binding<Bool> {
         Binding { viewModel.saveError != nil } set: {
             if !$0 {

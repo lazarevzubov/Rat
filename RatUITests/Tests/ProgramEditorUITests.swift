@@ -186,6 +186,27 @@ final class ProgramEditorUITests: XCTestCase {
         )
     }
 
+    func testWithoutDays_hidesEditButton() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewProgramEditor(in: app)
+
+        XCTAssertTrue(
+            app.navigationBars["Push Pull Legs"].buttons["Edit"].waitForNonExistence(timeout: 2.0),
+            "There's nothing to reorder or delete while the program has no days."
+        )
+    }
+
+    func testWithDay_showsEditButton() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewProgramEditor(in: app)
+
+        app.buttons["Add Day"].tap()
+        XCTAssertTrue(
+            app.navigationBars["Push Pull Legs"].buttons["Edit"].waitForExistence(timeout: 5.0),
+            "A day can be reordered or deleted, so the edit button is offered."
+        )
+    }
+
     // MARK: Private methods
 
     private func deleteText(in field: XCUIElement, previousLength: Int) {
@@ -216,6 +237,14 @@ final class ProgramEditorUITests: XCTestCase {
         XCTAssertTrue(
             app.staticTexts[programName].waitForExistence(timeout: 5.0), "The autosaved program appears in the list."
         )
+    }
+
+    private func openNewProgramEditor(in app: XCUIApplication) {
+        app.buttons["Add Program"].tap()
+
+        let nameField = app.textFields["Program Name"]
+        nameField.tap()
+        nameField.typeText("Push Pull Legs")
     }
 
 }

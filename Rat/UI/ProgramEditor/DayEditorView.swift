@@ -38,12 +38,20 @@ struct DayEditorView: View {
                     : day.name
             )
             .onDisappear { focusedField = nil }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    EditButton()
-                        .accessibilityLabel("Reorder or Delete Exercises")
+            .onChange(of: day.exerciseTemplates.isEmpty) {
+                if $1 {
+                    editMode = .inactive
                 }
             }
+            .toolbar {
+                if !day.exerciseTemplates.isEmpty {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        EditButton()
+                            .accessibilityLabel("Reorder or Delete Exercises")
+                    }
+                }
+            }
+            .environment(\.editMode, $editMode)
     }
 
     // MARK: Private properties
@@ -56,6 +64,8 @@ struct DayEditorView: View {
             .contentShape(Rectangle())
             .onTapGesture { focusedField = nil }
     }
+    @State
+    private var editMode = EditMode.inactive
     @FocusState
     private var focusedField: Field?
 

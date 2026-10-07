@@ -69,12 +69,20 @@ struct ExerciseEditorView: View {
                     : exercise.name
             )
             .onDisappear { focusedField = nil }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    EditButton()
-                        .accessibilityLabel("Reorder or Delete Sets")
+            .onChange(of: exercise.setTemplates.isEmpty) {
+                if $1 {
+                    editMode = .inactive
                 }
             }
+            .toolbar {
+                if !exercise.setTemplates.isEmpty {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        EditButton()
+                            .accessibilityLabel("Reorder or Delete Sets")
+                    }
+                }
+            }
+            .environment(\.editMode, $editMode)
     }
 
     // MARK: Private properties
@@ -86,6 +94,8 @@ struct ExerciseEditorView: View {
             .contentShape(Rectangle())
             .onTapGesture { focusedField = nil }
     }
+    @State
+    private var editMode = EditMode.inactive
     @Binding
     private var exercise: ExerciseTemplate
     @FocusState

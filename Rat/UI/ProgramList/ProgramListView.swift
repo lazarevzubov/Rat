@@ -17,10 +17,17 @@ struct ProgramListView: View {
                 .onDelete { viewModel.handleDelete(at: $0) }
         }
             .navigationTitle("Programs")
+            .onChange(of: viewModel.programs.isEmpty) {
+                if $1 {
+                    editMode = .inactive
+                }
+            }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    EditButton()
-                        .accessibilityLabel("Reorder or Delete Programs")
+                if !viewModel.programs.isEmpty {
+                    ToolbarItem(placement: .topBarLeading) {
+                        EditButton()
+                            .accessibilityLabel("Reorder or Delete Programs")
+                    }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Program", systemImage: "plus") { viewModel.handleAddProgramButtonTap() }
@@ -37,10 +44,13 @@ struct ProgramListView: View {
             } message: {
                 Text(viewModel.loadError?.localizedDescription ?? "")
             }
+            .environment(\.editMode, $editMode)
     }
 
     // MARK: Private properties
 
+    @State
+    private var editMode = EditMode.inactive
     private var errorBinding: Binding<Bool> {
         Binding { viewModel.loadError != nil } set: {
             if !$0 {

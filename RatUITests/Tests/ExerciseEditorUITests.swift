@@ -51,6 +51,81 @@ final class ExerciseEditorUITests: XCTestCase {
         )
     }
 
+    func testTappingAddSet_dismissesNameKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewExerciseEditor(in: app)
+
+        let nameField = app.textFields["Exercise Name"]
+        nameField.tap()
+        nameField.typeText("Bench Press")
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Typing into the name field shows the keyboard.")
+
+        app.buttons["Add Set"].tap()
+        XCTAssertTrue(
+            keyboard.waitForNonExistence(timeout: 5.0),
+            "Adding a set dismisses the keyboard left from typing the exercise name."
+        )
+    }
+
+    func testTappingBlankSpace_dismissesNumberKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewExerciseEditor(in: app)
+
+        app.textFields["Max"].tap()
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the max field shows the number keyboard.")
+
+        app.blankSpace(below: app.buttons["Add Set"]).tap()
+        XCTAssertTrue(
+            keyboard.waitForNonExistence(timeout: 5.0), "Tapping outside the max field dismisses the keyboard."
+        )
+    }
+
+    func testDraggingFromContent_dismissesNumberKeyboardAndUnfocusesField() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewExerciseEditor(in: app)
+
+        let maxField = app.textFields["Max"]
+        maxField.tap()
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the max field shows the number keyboard.")
+        XCTAssertNotEqual(maxField.value as? String, "0", "A focused, untouched max field is shown empty.")
+
+        let start = app.staticTexts["Sets"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: .zero, dy: -50.0)))
+
+        XCTAssertTrue(
+            keyboard.waitForNonExistence(timeout: 5.0),
+            "Dragging the content outside the max field dismisses the keyboard."
+        )
+        XCTAssertEqual(maxField.value as? String, "0", "The field loses focus, so its untouched value is shown again.")
+    }
+
+    func testTappingAnotherField_keepsFocusOnIt() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewExerciseEditor(in: app)
+
+        let nameField = app.textFields["Exercise Name"]
+        nameField.tap()
+        nameField.typeText("Bench Press")
+
+        let maxField = app.textFields["Max"]
+        maxField.tap()
+        wait(
+            for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "value != '0'"), object: maxField)],
+            timeout: 5.0
+        )
+
+        let focusLost = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == '0'"), object: maxField)
+        focusLost.isInverted = true
+
+        wait(for: [focusLost], timeout: 2.0)
+    }
+
     // MARK: Private methods
 
     private func openNewExerciseEditor(in app: XCUIApplication) {

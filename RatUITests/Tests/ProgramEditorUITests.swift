@@ -115,11 +115,58 @@ final class ProgramEditorUITests: XCTestCase {
         XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Typing into the name field shows the keyboard.")
 
         app.buttons["Add Day"].tap()
+        nameField.tap()
+
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the name field again shows the keyboard.")
+
         app.buttons["Untitled Day"].tap()
 
         wait(
             for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: keyboard)],
             timeout: 5.0
+        )
+    }
+
+    func testTappingAddDay_dismissesProgramNameKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewProgramEditor(in: app)
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Typing into the name field shows the keyboard.")
+
+        app.buttons["Add Day"].tap()
+        XCTAssertTrue(
+            keyboard.waitForNonExistence(timeout: 5.0),
+            "Adding a day dismisses the keyboard left from typing the program name."
+        )
+    }
+
+    func testTappingBlankSpace_dismissesProgramNameKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewProgramEditor(in: app)
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Typing into the name field shows the keyboard.")
+
+        app.blankSpace(below: app.buttons["Add Day"]).tap()
+        XCTAssertTrue(
+            keyboard.waitForNonExistence(timeout: 5.0), "Tapping outside the name field dismisses the keyboard."
+        )
+    }
+
+    func testDraggingFromContent_dismissesProgramNameKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewProgramEditor(in: app)
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Typing into the name field shows the keyboard.")
+
+        let start = app.staticTexts["Days"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: .zero, dy: -50.0)))
+
+        XCTAssertTrue(
+            keyboard.waitForNonExistence(timeout: 5.0),
+            "Dragging the content outside the name field dismisses the keyboard."
         )
     }
 

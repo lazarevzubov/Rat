@@ -47,8 +47,8 @@ struct LoggedSetRowView: View {
     /// Creates a logged set row view.
     /// - Parameters:
     ///   - set: A binding to the logged set being edited.
-    ///   - focusedField: The enclosing active workout screen's shared focus state, so tapping elsewhere on that screen—including another set's
-    ///   row—dismisses this row's keyboard too.
+    ///   - focusedField: The enclosing active workout screen's shared focus state, so the screen can dismiss whichever row's keyboard is
+    ///   showing.
     init(set: Binding<LoggedSet>, focusedField: FocusState<ActiveWorkoutView.Field?>.Binding) {
         self.focusedField = focusedField
         _set = set

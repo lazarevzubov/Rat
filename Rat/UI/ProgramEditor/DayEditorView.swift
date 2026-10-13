@@ -27,11 +27,13 @@ struct DayEditorView: View {
                     .onDelete(perform: { day.deleteExercise(at: $0) })
                     .onMove(perform: { day.moveExercise(from: $0, to: $1) })
                 Button("Add Exercise", systemImage: "plus") {
+                    focusedField = nil
                     withAnimation { day.addExercise() }
                 }
             }
         }
-            .background(dismissFocusBackground)
+            .scrollDismissesKeyboard(.immediately)
+            .onTouchBelowContent { focusedField = nil }
             .navigationTitle(
                 day.name.isEmpty
                     ? "New Day"
@@ -59,11 +61,6 @@ struct DayEditorView: View {
     private let filterExerciseNameSuggestions: (String) -> [String]
     @Binding
     private var day: DayTemplate
-    private var dismissFocusBackground: some View {
-        Color.clear
-            .contentShape(Rectangle())
-            .onTapGesture { focusedField = nil }
-    }
     @State
     private var editMode = EditMode.inactive
     @FocusState

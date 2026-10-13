@@ -90,8 +90,7 @@ struct SetRowView: View {
     /// - Parameters:
     ///   - set: A binding to the set template being edited.
     ///   - exerciseMax: The exercise's current working max in kg, used to suggest a weight.
-    ///   - focusedField: The enclosing exercise editor's shared focus state, so tapping elsewhere on that
-    ///   screen—including another set's row—dismisses this row's keyboard too.
+    ///   - focusedField: The enclosing exercise editor's shared focus state, so the screen can dismiss whichever row's keyboard is showing.
     ///   - fieldValueStrategy: Decides what the weight/percent fields should currently display.
     init(
         set: Binding<SetTemplate>,

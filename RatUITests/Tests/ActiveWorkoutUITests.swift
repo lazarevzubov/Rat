@@ -43,6 +43,44 @@ final class ActiveWorkoutUITests: XCTestCase {
         )
     }
 
+    func testTappingBlankSpace_dismissesWeightKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        addProgramWithDayExerciseAndSet(in: app, named: "Push Pull Legs")
+
+        app.staticTexts["Push Pull Legs"].tap()
+        app.buttons["Start Workout"].tap()
+        app.textFields["Weight"].tap()
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the weight field shows the number keyboard.")
+
+        app.blankSpace(below: app.switches["Increase Next Time"]).tap()
+
+        XCTAssertTrue(
+            keyboard.waitForNonExistence(timeout: 5.0), "Tapping outside the weight field dismisses the keyboard."
+        )
+    }
+
+    func testDraggingFromContent_dismissesWeightKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        addProgramWithDayExerciseAndSet(in: app, named: "Push Pull Legs")
+
+        app.staticTexts["Push Pull Legs"].tap()
+        app.buttons["Start Workout"].tap()
+        app.textFields["Weight"].tap()
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the weight field shows the number keyboard.")
+
+        let start = app.staticTexts["Bench Press"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: .zero, dy: -50.0)))
+
+        XCTAssertTrue(
+            keyboard.waitForNonExistence(timeout: 5.0),
+            "Dragging the content outside the weight field dismisses the keyboard."
+        )
+    }
+
     // MARK: Private methods
 
     private func addProgramWithDayExerciseAndSet(in app: XCUIApplication, named name: String) {

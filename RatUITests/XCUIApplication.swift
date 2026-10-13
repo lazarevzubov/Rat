@@ -12,4 +12,8 @@ extension XCUIApplication {
         return app
     }
 
+    func blankSpace(below element: XCUIElement) -> XCUICoordinate {
+        coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: frame.midX, dy: element.frame.maxY + 60.0))
+    }
+
 }

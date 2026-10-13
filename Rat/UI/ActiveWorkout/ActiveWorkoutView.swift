@@ -30,7 +30,8 @@ struct ActiveWorkoutView: View {
                 }
             }
         }
-            .background(dismissFocusBackground)
+            .scrollDismissesKeyboard(.immediately)
+            .onTouchBelowContent { focusedField = nil }
             .navigationTitle(viewModel.session?.dayName ?? "Workout")
             .onDisappear { focusedField = nil }
             .onChange(of: viewModel.didSave) {
@@ -56,12 +57,6 @@ struct ActiveWorkoutView: View {
 
     @Environment(\.dismiss)
     private var dismiss
-    private var dismissFocusBackground: some View {
-        Color
-            .clear
-            .contentShape(Rectangle())
-            .onTapGesture { focusedField = nil }
-    }
     private var errorBinding: Binding<Bool> {
         Binding { viewModel.presentedError != nil } set: {
             if !$0 {

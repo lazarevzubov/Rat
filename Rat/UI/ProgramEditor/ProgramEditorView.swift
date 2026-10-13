@@ -29,11 +29,13 @@ struct ProgramEditorView: View {
                     .onDelete { viewModel.handleDeleteDay(at: $0) }
                     .onMove { viewModel.handleMoveDay(from: $0, to: $1) }
                 Button("Add Day", systemImage: "plus") {
+                    focusedField = nil
                     withAnimation { viewModel.handleAddDayButtonTap() }
                 }
             }
         }
-            .background(dismissFocusBackground)
+            .scrollDismissesKeyboard(.immediately)
+            .onTouchBelowContent { focusedField = nil }
             .navigationTitle(
                 viewModel.program.name.isEmpty
                     ? "New Program"
@@ -76,11 +78,6 @@ struct ProgramEditorView: View {
 
     @Environment(\.dismiss)
     private var dismiss
-    private var dismissFocusBackground: some View {
-        Color.clear
-            .contentShape(Rectangle())
-            .onTapGesture { focusedField = nil }
-    }
     @State
     private var editMode = EditMode.inactive
     private var errorBinding: Binding<Bool> {

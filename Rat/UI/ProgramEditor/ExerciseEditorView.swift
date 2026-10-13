@@ -58,11 +58,13 @@ struct ExerciseEditorView: View {
                     .onDelete { exercise.deleteSet(at: $0) }
                     .onMove { exercise.moveSet(from: $0, to: $1) }
                 Button("Add Set", systemImage: "plus") {
+                    focusedField = nil
                     withAnimation { exercise.addSet() }
                 }
             }
         }
-            .background(dismissFocusBackground)
+            .scrollDismissesKeyboard(.immediately)
+            .onTouchBelowContent { focusedField = nil }
             .navigationTitle(
                 exercise.name.isEmpty
                     ? "New Exercise"
@@ -89,11 +91,6 @@ struct ExerciseEditorView: View {
 
     private let fieldValueStrategy: NumberFieldValueStrategy
     private let filterNameSuggestions: (String) -> [String]
-    private var dismissFocusBackground: some View {
-        Color.clear
-            .contentShape(Rectangle())
-            .onTapGesture { focusedField = nil }
-    }
     @State
     private var editMode = EditMode.inactive
     @Binding

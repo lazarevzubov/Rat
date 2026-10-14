@@ -126,6 +126,100 @@ final class ExerciseEditorUITests: XCTestCase {
         wait(for: [focusLost], timeout: 2.0)
     }
 
+    func testTappingSetField_keepsKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewExerciseEditor(in: app)
+        addSet(in: app)
+
+        app.textFields["% of Max"].tap()
+
+        let keyboard = app.keyboards.element
+
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the percent field shows the number keyboard.")
+        XCTAssertFalse(keyboard.waitForNonExistence(timeout: 2.0), "Tapping the percent field leaves it focused.")
+    }
+
+    func testTappingStepper_dismissesNumberKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewExerciseEditor(in: app)
+        addSet(in: app)
+
+        app.textFields["% of Max"].tap()
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the percent field shows the number keyboard.")
+
+        app.steppers["Reps: 10"].buttons["Increment"].tap()
+
+        XCTAssertTrue(
+            keyboard.waitForNonExistence(timeout: 5.0), "Tapping outside the percent field dismisses the keyboard."
+        )
+        XCTAssertTrue(app.steppers["Reps: 11"].exists, "The stepper still steps.")
+    }
+
+    func testTappingKindPicker_dismissesNumberKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewExerciseEditor(in: app)
+        addSet(in: app)
+
+        app.textFields["% of Max"].tap()
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the percent field shows the number keyboard.")
+
+        app.buttons["Warm-up"].tap()
+
+        XCTAssertTrue(
+            keyboard.waitForNonExistence(timeout: 5.0), "Tapping outside the percent field dismisses the keyboard."
+        )
+        XCTAssertTrue(app.textFields["Weight"].exists, "The picker still switches the kind of the set.")
+    }
+
+    func testTappingUnitLabel_dismissesNumberKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewExerciseEditor(in: app)
+
+        app.textFields["Max"].tap()
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the max field shows the number keyboard.")
+
+        app.staticTexts["kg"].tap()
+        XCTAssertTrue(
+            keyboard.waitForNonExistence(timeout: 5.0), "Tapping outside the max field dismisses the keyboard."
+        )
+    }
+
+    func testTappingSetLabel_dismissesNumberKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewExerciseEditor(in: app)
+        addSet(in: app)
+
+        app.textFields["Max"].tap()
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the max field shows the number keyboard.")
+
+        app.staticTexts["% of Max"].tap()
+        XCTAssertTrue(
+            keyboard.waitForNonExistence(timeout: 5.0), "Tapping outside the max field dismisses the keyboard."
+        )
+    }
+
+    func testTappingEditButton_dismissesNumberKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewExerciseEditor(in: app)
+        addSet(in: app)
+
+        app.textFields["Max"].tap()
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the max field shows the number keyboard.")
+
+        app.navigationBars["New Exercise"].buttons["Edit"].tap()
+        XCTAssertTrue(keyboard.waitForNonExistence(timeout: 5.0), "Tapping Edit dismisses the keyboard.")
+    }
+
     // MARK: Private methods
 
     private func openNewExerciseEditor(in app: XCUIApplication) {
@@ -140,6 +234,11 @@ final class ExerciseEditorUITests: XCTestCase {
 
         app.buttons["Add Exercise"].tap()
         app.buttons["Untitled Exercise"].tap()
+    }
+
+    private func addSet(in app: XCUIApplication) {
+        app.buttons["Add Set"].tap()
+        XCTAssertTrue(app.textFields["% of Max"].waitForExistence(timeout: 5.0), "A working set is added by default.")
     }
 
 }

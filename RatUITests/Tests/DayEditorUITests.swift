@@ -125,6 +125,20 @@ final class DayEditorUITests: XCTestCase {
         )
     }
 
+    func testTappingEditButton_dismissesNameKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewDayEditor(in: app)
+
+        app.buttons["Add Exercise"].tap()
+        app.textFields["Day Name"].tap()
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the name field shows the keyboard.")
+
+        app.navigationBars["New Day"].buttons["Edit"].tap()
+        XCTAssertTrue(keyboard.waitForNonExistence(timeout: 5.0), "Tapping Edit dismisses the keyboard.")
+    }
+
     // MARK: Private methods
 
     private func openNewDayEditor(in app: XCUIApplication) {

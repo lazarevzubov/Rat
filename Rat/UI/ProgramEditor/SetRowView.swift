@@ -17,6 +17,7 @@ struct SetRowView: View {
             }
                 .pickerStyle(.segmented)
             Stepper("Reps: \(set.targetReps)", value: $set.targetReps, in: 1...50)
+                .onChange(of: set.targetReps) { focusedField.wrappedValue = nil }
             if set.kind == .warmUp {
                 HStack {
                     Text("Weight")
@@ -45,6 +46,8 @@ struct SetRowView: View {
                     .accessibilityValue(percentOfMaxAccessibilityValue)
             }
         }
+            .contentShape(Rectangle())
+            .onTapGesture { focusedField.wrappedValue = nil }
     }
 
     // MARK: Private properties
@@ -90,7 +93,7 @@ struct SetRowView: View {
     /// - Parameters:
     ///   - set: A binding to the set template being edited.
     ///   - exerciseMax: The exercise's current working max in kg, used to suggest a weight.
-    ///   - focusedField: The enclosing exercise editor's shared focus state, so the screen can dismiss whichever row's keyboard is showing.
+    ///   - focusedField: The enclosing exercise editor's shared focus state, which the row clears when anything but its weight field is touched.
     ///   - fieldValueStrategy: Decides what the weight/percent fields should currently display.
     init(
         set: Binding<SetTemplate>,

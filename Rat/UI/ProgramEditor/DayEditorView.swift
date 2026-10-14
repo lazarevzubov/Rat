@@ -40,6 +40,7 @@ struct DayEditorView: View {
                     : day.name
             )
             .onDisappear { focusedField = nil }
+            .onChange(of: editMode) { focusedField = nil }
             .onChange(of: day.exerciseTemplates.isEmpty) {
                 if $1 {
                     editMode = .inactive

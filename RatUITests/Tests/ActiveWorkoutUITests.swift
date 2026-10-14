@@ -81,6 +81,78 @@ final class ActiveWorkoutUITests: XCTestCase {
         )
     }
 
+    func testTappingWeightField_keepsKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        addProgramWithDayExerciseAndSet(in: app, named: "Push Pull Legs")
+
+        app.staticTexts["Push Pull Legs"].tap()
+        app.buttons["Start Workout"].tap()
+        app.textFields["Weight"].tap()
+
+        let keyboard = app.keyboards.element
+
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the weight field shows the number keyboard.")
+        XCTAssertFalse(keyboard.waitForNonExistence(timeout: 2.0), "Tapping the weight field leaves it focused.")
+    }
+
+    func testTappingStepper_dismissesWeightKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        addProgramWithDayExerciseAndSet(in: app, named: "Push Pull Legs")
+
+        app.staticTexts["Push Pull Legs"].tap()
+        app.buttons["Start Workout"].tap()
+        app.textFields["Weight"].tap()
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the weight field shows the number keyboard.")
+
+        app.steppers["Reps: 10"].buttons["Increment"].tap()
+
+        XCTAssertTrue(
+            keyboard.waitForNonExistence(timeout: 5.0), "Tapping outside the weight field dismisses the keyboard."
+        )
+        XCTAssertTrue(app.steppers["Reps: 11"].exists, "The stepper still steps.")
+    }
+
+    func testTappingToggle_dismissesWeightKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        addProgramWithDayExerciseAndSet(in: app, named: "Push Pull Legs")
+
+        app.staticTexts["Push Pull Legs"].tap()
+        app.buttons["Start Workout"].tap()
+        app.textFields["Weight"].tap()
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the weight field shows the number keyboard.")
+
+        let toggle = app.switches["Increase Next Time"]
+
+        // The switch's reported frame spans the whole row, so only its trailing edge is the actual switch.
+        toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+
+        XCTAssertTrue(
+            keyboard.waitForNonExistence(timeout: 5.0), "Tapping outside the weight field dismisses the keyboard."
+        )
+        XCTAssertEqual(toggle.value as? String, "1", "The toggle still toggles.")
+    }
+
+    func testTappingKindCaption_dismissesWeightKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        addProgramWithDayExerciseAndSet(in: app, named: "Push Pull Legs")
+
+        app.staticTexts["Push Pull Legs"].tap()
+        app.buttons["Start Workout"].tap()
+        app.textFields["Weight"].tap()
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the weight field shows the number keyboard.")
+
+        app.staticTexts["Working"].tap()
+        XCTAssertTrue(
+            keyboard.waitForNonExistence(timeout: 5.0), "Tapping outside the weight field dismisses the keyboard."
+        )
+    }
+
     // MARK: Private methods
 
     private func addProgramWithDayExerciseAndSet(in app: XCUIApplication, named name: String) {

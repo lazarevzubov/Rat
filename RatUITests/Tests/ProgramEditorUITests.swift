@@ -217,6 +217,51 @@ final class ProgramEditorUITests: XCTestCase {
         )
     }
 
+    func testTappingEditButton_dismissesProgramNameKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewProgramEditor(in: app)
+
+        app.buttons["Add Day"].tap()
+        app.textFields["Program Name"].tap()
+
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "Tapping the name field shows the keyboard.")
+
+        app.navigationBars["Push Pull Legs"].buttons["Edit"].tap()
+        XCTAssertTrue(keyboard.waitForNonExistence(timeout: 5.0), "Tapping Edit dismisses the keyboard.")
+    }
+
+    func testAddExercise_tappingSuggestion_dismissesKeyboard() {
+        let app = XCUIApplication.launchedForTesting()
+        addProgramWithExercise(in: app, programName: "Push Pull Legs", exerciseName: "Bench Press")
+
+        app.buttons["Add Program"].tap()
+
+        let nameField = app.textFields["Program Name"]
+        nameField.tap()
+        nameField.typeText("Upper Lower")
+
+        app.buttons["Add Day"].tap()
+        app.buttons["Untitled Day"].tap()
+
+        app.buttons["Add Exercise"].tap()
+        app.buttons["Untitled Exercise"].tap()
+
+        let exerciseNameField = app.textFields["Exercise Name"]
+        exerciseNameField.tap()
+        exerciseNameField.typeText("Bench")
+
+        let suggestion = app.buttons["Bench Press"]
+        XCTAssertTrue(
+            suggestion.waitForExistence(timeout: 5.0), "A previously used matching exercise name is suggested."
+        )
+
+        suggestion.tap()
+        XCTAssertTrue(
+            app.keyboards.element.waitForNonExistence(timeout: 5.0), "Tapping the suggestion dismisses the keyboard."
+        )
+    }
+
     // MARK: Private methods
 
     private func deleteText(in field: XCUIElement, previousLength: Int) {

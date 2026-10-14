@@ -42,6 +42,7 @@ struct ProgramEditorView: View {
                     : viewModel.program.name
             )
             .onDisappear { focusedField = nil }
+            .onChange(of: editMode) { focusedField = nil }
             .onChange(of: viewModel.program.dayTemplates.isEmpty) {
                 if $1 {
                     editMode = .inactive

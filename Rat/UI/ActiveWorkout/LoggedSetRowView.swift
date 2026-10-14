@@ -13,6 +13,7 @@ struct LoggedSetRowView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             Stepper("Reps: \(set.reps)", value: $set.reps, in: 1...50)
+                .onChange(of: set.reps) { focusedField.wrappedValue = nil }
             HStack {
                 Text("Weight")
                 TextField("Weight", value: $set.weight, format: .number)
@@ -25,7 +26,10 @@ struct LoggedSetRowView: View {
                 .accessibilityLabel("Weight")
                 .accessibilityValue("\(set.weight.formatted()) kilograms")
             Toggle("Increase Next Time", isOn: $set.increaseNextTime)
+                .onChange(of: set.increaseNextTime) { focusedField.wrappedValue = nil }
         }
+            .contentShape(Rectangle())
+            .onTapGesture { focusedField.wrappedValue = nil }
     }
 
     // MARK: Private properties
@@ -47,8 +51,8 @@ struct LoggedSetRowView: View {
     /// Creates a logged set row view.
     /// - Parameters:
     ///   - set: A binding to the logged set being edited.
-    ///   - focusedField: The enclosing active workout screen's shared focus state, so the screen can dismiss whichever row's keyboard is
-    ///   showing.
+    ///   - focusedField: The enclosing active workout screen's shared focus state, which the row clears when anything but its weight field is
+    ///   touched.
     init(set: Binding<LoggedSet>, focusedField: FocusState<ActiveWorkoutView.Field?>.Binding) {
         self.focusedField = focusedField
         _set = set

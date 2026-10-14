@@ -34,7 +34,10 @@ struct ExerciseEditorView: View {
                 if !nameSuggestions.isEmpty {
                     Section("Suggestions") {
                         ForEach(nameSuggestions, id: \.self) { suggestion in
-                            Button(suggestion) { exercise.name = suggestion }
+                            Button(suggestion) {
+                                exercise.name = suggestion
+                                focusedField = nil
+                            }
                         }
                     }
                 }
@@ -47,6 +50,8 @@ struct ExerciseEditorView: View {
                     Text("kg")
                         .foregroundStyle(.secondary)
                 }
+                    .contentShape(Rectangle())
+                    .onTapGesture { focusedField = nil }
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel("Working Max")
                     .accessibilityValue("\(exercise.max.formatted()) kilograms")
@@ -71,6 +76,7 @@ struct ExerciseEditorView: View {
                     : exercise.name
             )
             .onDisappear { focusedField = nil }
+            .onChange(of: editMode) { focusedField = nil }
             .onChange(of: exercise.setTemplates.isEmpty) {
                 if $1 {
                     editMode = .inactive

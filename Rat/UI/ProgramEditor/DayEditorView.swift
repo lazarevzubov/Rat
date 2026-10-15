@@ -30,10 +30,12 @@ struct DayEditorView: View {
                     focusedField = nil
                     withAnimation { day.addExercise() }
                 }
+                    .id(ScrollTarget.addButton)
             }
         }
             .scrollDismissesKeyboard(.immediately)
             .onTouchBelowContent { focusedField = nil }
+            .scrolls(to: .addButton, whenCountGrows: day.exerciseTemplates.count)
             .navigationTitle(
                 day.name.isEmpty
                     ? "New Day"

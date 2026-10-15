@@ -220,6 +220,24 @@ final class ExerciseEditorUITests: XCTestCase {
         XCTAssertTrue(keyboard.waitForNonExistence(timeout: 5.0), "Tapping Edit dismisses the keyboard.")
     }
 
+    func testAddingSets_scrollsDownToNewSet() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewExerciseEditor(in: app)
+
+        let nameField = app.textFields["Exercise Name"]
+        nameField.tap()
+        nameField.typeText("Bench Press")
+
+        let addSetButton = app.buttons["Add Set"]
+        for _ in 1...6 {
+            addSetButton.tap()
+        }
+
+        XCTAssertTrue(
+            addSetButton.isHittable, "The button right below the newest set stays on screen, so the set is shown too."
+        )
+    }
+
     // MARK: Private methods
 
     private func openNewExerciseEditor(in app: XCUIApplication) {

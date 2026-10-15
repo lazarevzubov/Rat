@@ -32,10 +32,12 @@ struct ProgramEditorView: View {
                     focusedField = nil
                     withAnimation { viewModel.handleAddDayButtonTap() }
                 }
+                    .id(ScrollTarget.addButton)
             }
         }
             .scrollDismissesKeyboard(.immediately)
             .onTouchBelowContent { focusedField = nil }
+            .scrolls(to: .addButton, whenCountGrows: viewModel.program.dayTemplates.count)
             .navigationTitle(
                 viewModel.program.name.isEmpty
                     ? "New Program"

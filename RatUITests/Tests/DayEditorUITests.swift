@@ -139,6 +139,21 @@ final class DayEditorUITests: XCTestCase {
         XCTAssertTrue(keyboard.waitForNonExistence(timeout: 5.0), "Tapping Edit dismisses the keyboard.")
     }
 
+    func testAddingExercises_scrollsDownToNewExercise() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewDayEditor(in: app)
+
+        let addExerciseButton = app.buttons["Add Exercise"]
+        for _ in 1...12 {
+            addExerciseButton.tap()
+        }
+
+        XCTAssertTrue(
+            addExerciseButton.isHittable,
+            "The button right below the newest exercise stays on screen, so the exercise is shown too."
+        )
+    }
+
     // MARK: Private methods
 
     private func openNewDayEditor(in app: XCUIApplication) {

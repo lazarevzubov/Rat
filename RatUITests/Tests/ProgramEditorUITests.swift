@@ -262,6 +262,20 @@ final class ProgramEditorUITests: XCTestCase {
         )
     }
 
+    func testAddingDays_scrollsDownToNewDay() {
+        let app = XCUIApplication.launchedForTesting()
+        openNewProgramEditor(in: app)
+
+        let addDayButton = app.buttons["Add Day"]
+        for _ in 1...12 {
+            addDayButton.tap()
+        }
+
+        XCTAssertTrue(
+            addDayButton.isHittable, "The button right below the newest day stays on screen, so the day is shown too."
+        )
+    }
+
     // MARK: Private methods
 
     private func deleteText(in field: XCUIElement, previousLength: Int) {

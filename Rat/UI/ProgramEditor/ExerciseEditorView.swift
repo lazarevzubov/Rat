@@ -66,10 +66,12 @@ struct ExerciseEditorView: View {
                     focusedField = nil
                     withAnimation { exercise.addSet() }
                 }
+                    .id(ScrollTarget.addButton)
             }
         }
             .scrollDismissesKeyboard(.immediately)
             .onTouchBelowContent { focusedField = nil }
+            .scrolls(to: .addButton, whenCountGrows: exercise.setTemplates.count)
             .navigationTitle(
                 exercise.name.isEmpty
                     ? "New Exercise"

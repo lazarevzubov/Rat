@@ -1,6 +1,6 @@
 # Rat — Current handoff
 
-Updated October 28, 2026. Read [AGENTS.md](AGENTS.md) for working agreements and [ROADMAP.md](ROADMAP.md) for the
+Updated October 29, 2026. Read [AGENTS.md](AGENTS.md) for working agreements and [ROADMAP.md](ROADMAP.md) for the
 single ordered backlog.
 
 ## Current checkpoint
@@ -27,12 +27,8 @@ specified in `ROADMAP.md` and `AGENTS.md`. Discover the current toolchain and si
 The configured deployment target is iOS 18.0 and the Swift language mode is 6. Real-device, older-runtime,
 and VoiceOver behavior remain unverified.
 
-## Persistence and remote notes
+## Persistence
 
 `ModelContainerFactory` currently deletes store files and retries after any container-creation failure. A schema
 change must prove that existing programs and workout history survive; a successful app launch alone cannot prove it.
 The migration check and fallback decision are part of `ROADMAP.md` task 1.
-
-Remote contents and access are unverified. A managed-device security restriction is unresolved; do not bypass or
-work around it. Attempt a normal push only after the user confirms the restriction was cleared or the destination
-was approved.

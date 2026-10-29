@@ -1,6 +1,6 @@
 # Rat — Design and remaining work
 
-Updated October 26, 2026. This is the maintained backlog of current behavior, ordered remaining work, and
+Updated October 29, 2026. This is the maintained backlog of current behavior, ordered remaining work, and
 pending decisions. Recommendations and unresolved decisions are labeled explicitly.
 
 ## Current product and model
@@ -121,8 +121,6 @@ These items have no approved implementation plan or priority:
 - Address keyboard dismissal on section headers/navigation titles; these remain known gaps. Real-device,
   older-runtime, and VoiceOver behavior remain unverified.
 - Correct the properties section heading in `View+ScrollsToTarget.swift` during an appropriate source cleanup.
-
-Remote pushing is an external dependency with unverified access. Follow the restriction in `HANDOFF.md`.
 
 ## Post-v1
 

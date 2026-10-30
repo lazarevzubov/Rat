@@ -10,8 +10,9 @@ single ordered backlog.
   and keep them out of commits. Check `git status` before relying on this snapshot.
 - Program CRUD/autosave, workout persistence and UI, autocomplete, keyboard dismissal fixes, empty Edit button
   handling, and autoscroll are implemented. `ROADMAP.md` distinguishes current behavior from requested changes.
-- All twelve findings from the October 29 project review are recorded as R1–R12 in `ROADMAP.md`. Their remedies
-  and position relative to the existing queue are not approved; recording them did not authorize implementation.
+- The October 29 project review and October 30 code-quality pass are documented under R1–R16 in `ROADMAP.md`.
+  Related small quality items are grouped, including API/test cleanup within R2 and R8. Their remedies and
+  position relative to the existing queue are not approved; recording them did not authorize implementation.
 
 ## Resume from here
 
@@ -32,6 +33,8 @@ setup because it tapped Edit instead of Back (R7). Scratch regressions and limit
 checks are summarized with their limits in `ROADMAP.md`; they do not establish real-device, older-runtime, or
 on-device migration behavior. Implementation tasks require scoped verification under `AGENTS.md`. Discover the
 current toolchain and simulator inventory when needed. The deployment target is iOS 18.0 and Swift mode is 6.
+The October 30 quality pass was static and ran no additional builds or tests; its cleanup recommendations do
+not carry new runtime verification.
 
 ## Persistence
 

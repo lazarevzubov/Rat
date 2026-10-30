@@ -109,12 +109,14 @@ Retest on a device. If it persists, capture reproduction details and plan a sepa
 close it as no longer reproducible.
 The row `simultaneousGesture` is a suspect, not a confirmed cause or an approved replacement design.
 
-## Additional findings from the October 29 project review
+## Project review findings
 
-All twelve findings below were recorded at the user's request on October 30. They have no approved implementation
-plans or position in the ordered queue; tasks 1–5 and their pending decisions remain unchanged. P1/P2 labels
-retain the review's severity assessment, not an approved implementation order. The remaining improvements have
-no assigned priority. In particular, R1 is separate from the already-known `ModelContainerFactory` recovery issue.
+R1–R12 record the October 29 project review. The October 30 code-quality pass added R13–R16 and related API/test
+cleanup to R2 and R8, consolidating small items by area. All findings were documented at the user's request;
+they have no approved implementation plans or position in the ordered queue. Tasks 1–5 and their pending
+decisions remain unchanged. P1/P2 labels retain the first review's severity assessment, not an approved
+implementation order. Unlabeled improvements have no assigned priority. R1 is separate from the already-known
+`ModelContainerFactory` recovery issue.
 
 Each follow-up needs its own scoped plan, branch, regression coverage, and verification under `AGENTS.md`.
 Schema changes also require the on-disk migration proof described in task 1. Suggested remedies below are options
@@ -142,6 +144,12 @@ the first save completed also allowed the second editor to overwrite a recent re
 Plan how to finish or coordinate pending writes when leaving an editor, and how to prevent stale snapshots from
 overwriting newer data or recreating deleted programs. Cover both reproduced sequences with deterministic VM
 regressions and the affected dismissal/navigation flow. Preserve debounced saving during ordinary editing.
+
+**Related code-quality cleanup from October 30:** production calls `handleProgramChanged()` only from
+`program.didSet`, but the method is externally callable and several VM tests invoke it directly. Make autosave
+scheduling a private implementation detail with a name such as `scheduleAutosave()`. Tests should edit program
+names or nested values, then observe persistence, errors, and callbacks through the actual mutation path.
+Keep lifecycle correctness coverage above distinct from merely testing that the scheduling helper was called.
 
 ### R3. [P2] Prevent duplicate workout saves
 
@@ -201,7 +209,9 @@ Locate the intended back control explicitly and wait for the destination. Search
 assumption and rerun the affected scenarios. This observed test-selector failure is separate from the reported
 ignored-navigation-tap issue awaiting a device retest above.
 
-### R8. Assert save-completion state after waiting
+### R8. Strengthen test assertions and service doubles
+
+**Save completion, confirmed by the October 29 mutation:**
 
 `handleSaveButtonTap_succeeds_setsDidSave` in
 [ActiveWorkoutViewModelTests.swift](RatTests/Tests/ActiveWorkoutViewModelTests.swift) only calls `waitFor`.
@@ -211,6 +221,26 @@ workout VM tests passing; this test merely waited about five seconds.
 
 Add a final `#expect` for the completion state with a message. Repeat the scratch mutation to demonstrate that
 the corrected test detects the regression, then run the relevant unmodified VM tests.
+
+**Related test-quality cleanup from October 30:**
+
+- The nested round-trip tests in
+  [ProgramPersistenceServiceTests.swift](RatTests/Tests/ProgramPersistenceServiceTests.swift) and
+  [WorkoutSessionPersistenceServiceTests.swift](RatTests/Tests/WorkoutSessionPersistenceServiceTests.swift)
+  assert only the first exercise's name. Losing every set or changing set values and identifiers would still
+  satisfy those assertions. Use multiple siblings and both set kinds, with focused checks of nested values,
+  identifiers, and ordering. Preserve the one-assertion-per-unit-test convention. The hierarchy-saving UI test in
+  [ProgramEditorUITests.swift](RatUITests/Tests/ProgramEditorUITests.swift) should also inspect the saved hierarchy
+  after reopening it, rather than checking only the program's list label. It also uses the fragile positional
+  navigation tracked in R7.
+- [WorkoutSessionStubService.swift](RatTests/Mocks/WorkoutSessionStubService.swift) fetches from `sessions`, but
+  saving only appends to `savedSessions`. In contrast, the program service double updates its fetchable state.
+  Either make the workout double stateful too, retaining the call log if useful, or explicitly distinguish a
+  configured stub from a stateful fake. Verify that the chosen contract supports save-then-start-next-workout
+  sequences without silently depending on manually reseeded history.
+
+These additional observations are coverage and test-double design gaps, not demonstrated production defects.
+Coordinate mutation-based autosave tests with R2, and keep the UI disappearance expectation tracked in R12.
 
 ### R9. Isolate hosted unit-test app startup from the normal store
 
@@ -252,6 +282,70 @@ animation, the wait returns true immediately instead of allowing removal to fini
 Use `waitForNonExistence` for this expectation and rerun the affected deletion scenario. This is a static test
 robustness finding; an animation-related failure was not reproduced during the review.
 
+### R13. Clarify domain ownership and enforce existing API contracts
+
+Group these small domain cleanups:
+
+- In [SetTemplate.swift](Rat/BusinessLogic/Domain/SetTemplate.swift), make `kind` externally read-only so callers
+  change it through `setKind(to:)`, which clears/defaults the kind-dependent weight and percentage fields. The UI
+  already uses that transition method. Keep the existing initializer and optional-field semantics; working sets
+  with no percentage are deliberately supported and tested.
+- Move [SetKind.swift](Rat/Service/Models/SetKind.swift) into `BusinessLogic/Domain`, because it is a plain domain
+  concept used by templates, logged sets, and views. Retain its type name, cases, raw values, and Codable
+  conformance; no second enum or mapping layer is needed.
+- Complete [WeightSuggestionModel.swift](Rat/BusinessLogic/WeightSuggestionModel.swift)'s return documentation:
+  it returns `nil` for a missing working percentage as well as for a nonworking set. That behavior is already
+  covered by the weight-suggestion tests.
+
+Verify the existing set-kind transitions and weight suggestions with their scoped tests and a Release build.
+This grouping concerns API enforcement, ownership, and documentation; it does not propose a stored-model change.
+
+### R14. Share the production schema definition
+
+The identical seven-entity list appears in [RatApp.swift](Rat/RatApp.swift),
+[PreviewSupport.swift](Rat/UI/PreviewSupport.swift),
+[ProgramPersistenceServiceTests.swift](RatTests/Tests/ProgramPersistenceServiceTests.swift), and
+[WorkoutSessionPersistenceServiceTests.swift](RatTests/Tests/WorkoutSessionPersistenceServiceTests.swift).
+Upcoming model changes otherwise require keeping four lists synchronized manually.
+
+Consider one small service-layer schema definition shared by runtime, previews, and those test fixtures. Keep
+each caller's store configuration, in-memory/on-disk choice, and recovery policy explicit. This does not call for
+a general repository/container abstraction, and R9's hosted-test startup isolation remains a separate concern.
+Verify that the shared definition preserves the current schema, both build configurations, previews, and scoped
+persistence tests; centralizing the list alone must not be treated as migration proof.
+
+### R15. Simplify UI binding and helper APIs
+
+Group these small simplifications while preserving current behavior:
+
+- [SetRowView.swift](Rat/UI/ProgramEditor/SetRowView.swift) wraps numeric bindings around other bindings that
+  merely read and write fields. Each weight/percentage field can use one direct binding while retaining the
+  focused-zero presentation and nil-to-zero conversion. Keep `kindBinding` routed through `setKind(to:)`.
+- [NumberFieldValueStrategy.swift](Rat/BusinessLogic/NumberFieldValueStrategy.swift) has no state, configuration,
+  or replaceable implementation, yet views store and accept concrete instances. Consider a static operation or
+  otherwise removing constructor parameters that offer no configuration or substitution. Do not introduce a
+  generic field framework for this cleanup.
+- [ActiveWorkoutViewModel.swift](Rat/UI/ActiveWorkout/ActiveWorkoutViewModel.swift)'s `sortedDayTemplates`
+  computed property performs a sort and returns `nil` for an empty collection. Prefer a local sorted array and
+  explicit empty guard, or a clearly named method. This makes the work and the nonempty precondition visible
+  without introducing an optional collection; R4 separately tracks the cycling-identity defect.
+
+Verify the affected number-field and workout-seeding behavior with scoped tests and a Release build. Preserve
+the settled focus, keyboard-dismissal, and autoscroll behavior, and coordinate numeric accessibility changes
+with R6 rather than treating simplified bindings as proof that accessibility is fixed.
+
+### R16. Apply the preview compilation convention consistently
+
+[DayEditorView.swift](Rat/UI/ProgramEditor/DayEditorView.swift),
+[ExerciseEditorView.swift](Rat/UI/ProgramEditor/ExerciseEditorView.swift),
+[SetRowView.swift](Rat/UI/ProgramEditor/SetRowView.swift), and
+[LoggedSetRowView.swift](Rat/UI/ActiveWorkout/LoggedSetRowView.swift) contain `#Preview` blocks outside explicit
+`#if DEBUG` guards, unlike the root screens and the agreement in `AGENTS.md`.
+
+Guard all four blocks consistently. Keep preview dependency setup in `PreviewSupport` and share fixtures where
+there is actual reuse. Check Debug previews and a Release device build; the review's earlier Release success
+means this is a convention cleanup, not a demonstrated Release failure.
+
 ### Review verification and limits
 
 - The October 29 review's Release device build, Xcode Analyze action, and Debug test-target build passed with no
@@ -264,6 +358,9 @@ robustness finding; an animation-related failure was not reproduced during the r
 - Runtime UI checks used an iOS 27.1 simulator; the separate on-disk service probe used macOS. These checks do not
   establish older-runtime, real-device, or on-device migration behavior. Scratch sources and test mutations were
   not added to the project. No production source was changed, staged, or committed by the review.
+- The October 30 code-quality pass was static source inspection. It ran no additional builds or tests and made
+  no application changes. Its recommendations describe maintainability, API consistency, and test coverage;
+  the earlier runtime evidence should not be attributed to these new cleanup suggestions.
 
 ## Unscheduled proposals and known limits
 

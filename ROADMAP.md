@@ -1,6 +1,6 @@
 # Rat — Design and remaining work
 
-Updated October 30, 2026. This is the maintained backlog of current behavior, ordered remaining work, and
+Updated October 31, 2026. This is the maintained backlog of current behavior, ordered remaining work, and
 pending decisions. Recommendations and unresolved decisions are labeled explicitly.
 
 ## Current product and model
@@ -72,7 +72,7 @@ save only completed sets remains settled.
 | Q16 | R11 — Release version metadata and app icon | Small, choices pending | Limited everyday-use benefit, but mandatory before distribution; promote if a release becomes the next milestone. |
 | Q17 | R14 — Share the production schema definition | Small | Reduces maintenance drift; not a functional or migration prerequisite. |
 | Q18 | R13 — Domain ownership and API contracts | Small | Narrow access-control, organization, and documentation cleanup. |
-| Q19 | R16 — Consistent preview compilation guards | Small | Aligns conventions; no Release failure was demonstrated. |
+| Q19 | R16 — Remove redundant guards around previews | Small | Simplifies preview declarations without an intended runtime behavior change. |
 | Q20 | R15 — Simplify bindings/helpers and correct the section heading | Small | Internal clarity with limited direct user benefit; preserve numeric/focus behavior and avoid reworking R6's field changes. |
 
 ### Lower current user impact, more complex work
@@ -408,17 +408,18 @@ Verify the affected number-field and workout-seeding behavior with scoped tests 
 the settled focus, keyboard-dismissal, and autoscroll behavior, and coordinate numeric accessibility changes
 with R6 rather than treating simplified bindings as proof that accessibility is fixed.
 
-### R16. Apply the preview compilation convention consistently
+### R16. Remove redundant guards around previews
 
-[DayEditorView.swift](Rat/UI/ProgramEditor/DayEditorView.swift),
-[ExerciseEditorView.swift](Rat/UI/ProgramEditor/ExerciseEditorView.swift),
-[SetRowView.swift](Rat/UI/ProgramEditor/SetRowView.swift), and
-[LoggedSetRowView.swift](Rat/UI/ActiveWorkout/LoggedSetRowView.swift) contain `#Preview` blocks outside explicit
-`#if DEBUG` guards, unlike the root screens and the agreement in `AGENTS.md`.
+[ContentView.swift](Rat/ContentView.swift),
+[ProgramListView.swift](Rat/UI/ProgramList/ProgramListView.swift),
+[ProgramEditorView.swift](Rat/UI/ProgramEditor/ProgramEditorView.swift), and
+[ActiveWorkoutView.swift](Rat/UI/ActiveWorkout/ActiveWorkoutView.swift) wrap their `#Preview` blocks in explicit
+`#if DEBUG` guards. Remove those wrappers; the other four preview blocks already follow the desired convention.
 
-Guard all four blocks consistently. Keep preview dependency setup in `PreviewSupport` and share fixtures where
-there is actual reuse. Check Debug previews and a Release device build; the review's earlier Release success
-means this is a convention cleanup, not a demonstrated Release failure.
+The October 31 review decision replaces the earlier recommendation to add guards. `AGENTS.md` now records the
+convention to leave `#Preview` blocks unguarded. Keep dependency setup in `PreviewSupport` and check its
+conditional compilation alongside these callers so both configurations compile. Verify Debug previews and a
+Release device build when implementing this cleanup.
 
 ### Review verification and limits
 

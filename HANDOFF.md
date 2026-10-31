@@ -1,6 +1,6 @@
 # Rat — Current handoff
 
-Updated October 30, 2026. Read [AGENTS.md](AGENTS.md) for working agreements and [ROADMAP.md](ROADMAP.md) for the
+Updated October 31, 2026. Read [AGENTS.md](AGENTS.md) for working agreements and [ROADMAP.md](ROADMAP.md) for the
 single ordered backlog.
 
 ## Current checkpoint
@@ -14,6 +14,8 @@ single ordered backlog.
   Related small quality items are grouped, including API/test cleanup within R2 and R8. The proposed Q1–Q23 queue
   now ranks the product tasks, review findings, and other backlog by user impact and estimated effort. This is
   a scheduling proposal; implementation plans and outstanding product decisions remain unapproved.
+- The October 31 review decision corrects R16 to remove existing `#if DEBUG` wrappers around `#Preview` blocks.
+  `AGENTS.md` records the updated convention; the source cleanup remains queued at Q19.
 
 ## Resume from here
 

@@ -21,18 +21,91 @@ Swift Concurrency, and Swift Testing, with an iOS 18.0 deployment target and Swi
 - Programs can be created blank and edited with debounced autosave (500 ms). Done dismisses the new-program sheet;
   Start Workout is in the program editor toolbar. Program cloning is not implemented.
 
-## Ordered implementation queue
+## Proposed implementation queue
 
-| Order | Task | Status / dependency |
-| --- | --- | --- |
-| 1 | Exercise-level Increase Next Time | Proposed plan; decisions below need approval |
-| 2 | Reliable and visible reminder across program days | Proposed plan; follows task 1 |
-| 3 | Mark sets done and save only completed sets | Save-only choice approved; detailed plan pending |
-| 4 | Protect an unsaved workout from dismissal | Agreed scope; detailed plan pending |
-| 5 | Plan workout edits updating program defaults | Requested; proposed position after tasks 1–4; scope to confirm |
+Revised October 30 using the requested order: high-impact/easier work, high-impact/complex work, lower-impact/easier
+work, then lower-impact/complex work. High impact means protecting user data, making workout records reliable,
+or preserving core editing and accessibility. Convenience and internal cleanup have lower current user impact.
+This proposal assumes reliable everyday use is the next goal; R11 becomes a release gate before distribution.
 
-Each implementation task gets its own reviewable branch and scoped verification under `AGENTS.md`.
-The device retest below can happen alongside this queue and does not block tasks 1–5.
+Effort includes regression coverage, UI/device checks where relevant, Release builds, and on-disk proof when
+needed. **Small** means a contained change without a schema migration or broad workflow redesign; **medium**
+means several coordinated changes, product decisions, or migration/interaction verification; **large** means
+cross-feature behavior or a substantial design/harness requirement. These are estimates, not time commitments.
+Re-estimate uncertain items after a scoped plan. Grouped entries can require several branches; each implementation
+task still follows the change-size limits and verification rules in `AGENTS.md`.
+
+**Q1–Q23 are proposed execution ranks.** Product tasks **1–5** and review IDs **R1–R16** remain stable references,
+not execution positions. K1–K5 identify the other backlog items below. This replaces the former five-item order
+without approving implementation plans or resolving their pending product decisions. The approved choice to
+save only completed sets remains settled.
+
+### High impact, easier fixes
+
+| Rank | Work | Effort | Why here / dependency |
+| --- | --- | --- | --- |
+| Q1 | R1 — Make program replacement atomic | Small | Prevents loss of an entire program through a narrow service change, with no intended schema change. Include on-disk atomicity proof. |
+| Q2 | R3 — Prevent duplicate workout saves | Small | Protects workout history; an in-flight guard and ID-based save semantics can avoid a schema change. |
+| Q3 | Product task 4 — Protect unsaved workouts | Small, scoped | Prevents losing a workout through sheet dismissal. Define confirmation conditions; native Cancel/confirmation handling needs no persisted drafts or completion-feature prerequisite. |
+| Q4 | R5 — Surface failed deletion and restore the list | Small | Prevents a misleading success state and supports recovery; contained VM/error-presentation work. |
+
+### High impact, more complex or dependency-bound work
+
+| Rank | Work | Effort | Why here / dependency |
+| --- | --- | --- | --- |
+| Q5 | K1 — Preserve unreadable stores and handle startup failure | Medium–large | Protects all programs/history from delete-and-retry recovery. Agree on failure/retry behavior before upcoming schema changes. |
+| Q6 | R2 — Coordinate autosave across editor lifecycle and deletion | Medium–large | Prevents stale writes and lost edits; dismissal, reopening, and deletion must agree. Simple task cancellation is insufficient. |
+| Q7 | R6 — Restore and verify numeric VoiceOver semantics | Medium, uncertain | Concerns core editing accessibility. Resolve the activation-verification gap while preserving settled keyboard behavior. |
+| Q8 | R4 — Keep workout cycling correct after day edits | Medium | Stable day identity needs legacy/deleted-day fallback decisions and migration proof. |
+| Q9 | Product task 1 — Exercise-level Increase Next Time | Medium | Enables the requested reminder workflow; the existing-flag migration choice and on-disk upgrade proof drive effort. |
+| Q10 | Product task 2 — Reliable reminders across program days | Small–medium, blocked | Complete the reminder outcome immediately after task 1. Its smaller isolated diff cannot precede the flag representation it depends on. |
+| Q11 | Product task 3 — Save only completed sets | Medium | Corrects what a saved workout means; completion state, omitted exercises, and reminder rules need a coordinated plan after tasks 1–2. |
+| Q12 | Product task 5 — Workout edits updating program defaults | Large | Requires reliable program writes plus settled completion/discard behavior and working-max policy. Follow R1/R2 and product tasks 1–4. |
+
+### Lower current user impact, easier improvements
+
+| Rank | Work | Effort | Why here / dependency |
+| --- | --- | --- | --- |
+| Q13 | R10 — Refresh autocomplete within an open editor | Small | Removes repeated typing; manual entry already works. |
+| Q14 | K2 — Correct toolbar labels and empty-program Start Workout | Small | Clearer affordances without changing a core workflow. |
+| Q15 | Remaining R7/R8/R9/R12 and K3 — Test reliability and organization | Small tasks | Finish relevant selectors, assertions, doubles, startup isolation, and screen-test placement not already delivered as verification preparation. |
+| Q16 | R11 — Release version metadata and app icon | Small, choices pending | Limited everyday-use benefit, but mandatory before distribution; promote if a release becomes the next milestone. |
+| Q17 | R14 — Share the production schema definition | Small | Reduces maintenance drift; not a functional or migration prerequisite. |
+| Q18 | R13 — Domain ownership and API contracts | Small | Narrow access-control, organization, and documentation cleanup. |
+| Q19 | R16 — Consistent preview compilation guards | Small | Aligns conventions; no Release failure was demonstrated. |
+| Q20 | R15 — Simplify bindings/helpers and correct the section heading | Small | Internal clarity with limited direct user benefit; preserve numeric/focus behavior and avoid reworking R6's field changes. |
+
+### Lower current user impact, more complex work
+
+| Rank | Work | Effort | Why here / dependency |
+| --- | --- | --- | --- |
+| Q21 | K4 — Program cloning | Medium, scope pending | Convenience feature requiring copy/identity semantics and a new flow; prioritize reliable existing workflows first. |
+| Q22 | K5 — Keyboard dismissal on headers/navigation titles | Medium, uncertain | Remaining convenience gap with known SwiftUI gesture constraints and potentially expensive device verification. |
+| Q23 | Post-v1 statistics, charts, and workout dates/frequency | Large, deferred | Broad optional scope without an approved design; remains deferred until after v1. |
+
+### Verification preparation and dependencies
+
+- Establish R9's isolated hosted-test startup before ordinary unit-test runs for Q1. Keep explicit on-disk and
+  migration harnesses on disk. This small prerequisite is part of safe verification, not a reason to move all
+  test cleanup ahead of user-facing fixes.
+- Pull only the required R8 assertions into the fixes they verify: nested replacement checks for R1, save
+  completion and coherent workout-double behavior for R3 and later workout sequences. Repair relevant R7 Back
+  queries before relying on affected UI tests. Remaining R7/R8/R9/R12/K3 work stays at Q15; do not repeat work
+  already completed with an earlier fix.
+- R14 may be a small preparation task if a schema-owning change actually needs it, but it must not block unrelated
+  data-safety fixes or substitute for migration proof. Preserve separate proposed branches for product tasks
+  1 and 2; confirmation of that split and the existing product decisions remain pending.
+- Run D1, the ignored-navigation-tap device retest below, alongside the next relevant UI verification when a
+  device is available. It is an investigation, not an assumed gesture fix or a global blocker. If reproduced as
+  a core navigation failure, prioritize the resulting fix by its observed impact and estimated effort.
+- Real-device, older-runtime, accessibility, and on-disk checks belong in each relevant plan. They are not
+  duplicate feature rows. A UI change needs accessible labels/state and current English text; the app still
+  has no localization or telemetry, so any need for those should be explicit in the scoped plan.
+
+## Product task details (stable IDs)
+
+The IDs below are retained so existing migration references and approved choices remain valid. Execution order
+comes from Q1–Q23 above. Each detailed plan still needs its outstanding decisions resolved before implementation.
 
 ### 1. Exercise-level Increase Next Time
 
@@ -95,7 +168,7 @@ to be settled in that plan.
 ### 5. Workout edits updating program defaults
 
 Requested behavior: editing workout weights/reps should update the program so the next workout reflects those
-edits. Confirm the priority and detailed behavior before implementation.
+edits. Its proposed position is Q12; confirm the detailed behavior before implementation.
 
 The proposed approach maps session sets back to templates in memory, preserving the separation of stored history
 from templates, and reuses debounced program saving. Reps and warm-up weight can update their template values;
@@ -104,7 +177,7 @@ weights too. Confirm that behavior and how program writes interact with cancel/d
 
 ## Parallel device retest: ignored navigation taps
 
-Some taps on newly added day/exercise rows were reported ignored. The issue was not reproduced in the simulator.
+**D1:** Some taps on newly added day/exercise rows were reported ignored. The issue was not reproduced in the simulator.
 Retest on a device. If it persists, capture reproduction details and plan a separate bugfix branch; otherwise
 close it as no longer reproducible.
 The row `simultaneousGesture` is a suspect, not a confirmed cause or an approved replacement design.
@@ -112,11 +185,10 @@ The row `simultaneousGesture` is a suspect, not a confirmed cause or an approved
 ## Project review findings
 
 R1–R12 record the October 29 project review. The October 30 code-quality pass added R13–R16 and related API/test
-cleanup to R2 and R8, consolidating small items by area. All findings were documented at the user's request;
-they have no approved implementation plans or position in the ordered queue. Tasks 1–5 and their pending
-decisions remain unchanged. P1/P2 labels retain the first review's severity assessment, not an approved
-implementation order. Unlabeled improvements have no assigned priority. R1 is separate from the already-known
-`ModelContainerFactory` recovery issue.
+cleanup to R2 and R8, consolidating small items by area. The proposed queue above now assigns execution ranks
+using user impact, effort, and dependencies. Implementation plans remain unapproved and the product tasks'
+pending decisions remain open. P1/P2 labels retain the first review's severity assessment; they are distinct from
+Q-ranks and effort estimates. R1 is separate from K1's `ModelContainerFactory` recovery issue.
 
 Each follow-up needs its own scoped plan, branch, regression coverage, and verification under `AGENTS.md`.
 Schema changes also require the on-disk migration proof described in task 1. Suggested remedies below are options
@@ -329,6 +401,8 @@ Group these small simplifications while preserving current behavior:
   computed property performs a sort and returns `nil` for an empty collection. Prefer a local sorted array and
   explicit empty guard, or a clearly named method. This makes the work and the nonempty precondition visible
   without introducing an optional collection; R4 separately tracks the cycling-identity defect.
+- Correct the properties section heading in
+  [View+ScrollsToTarget.swift](Rat/UI/Extensions/View+ScrollsToTarget.swift) during this helper cleanup.
 
 Verify the affected number-field and workout-seeding behavior with scoped tests and a Release build. Preserve
 the settled focus, keyboard-dismissal, and autoscroll behavior, and coordinate numeric accessibility changes
@@ -362,19 +436,25 @@ means this is a convention cleanup, not a demonstrated Release failure.
   no application changes. Its recommendations describe maintainability, API consistency, and test coverage;
   the earlier runtime evidence should not be attributed to these new cleanup suggestions.
 
-## Unscheduled proposals and known limits
+## Other backlog details and known limits
 
-These items have no approved implementation plan or priority:
+K1–K5 identify previously unscheduled proposals now included in the suggested queue. Their implementation plans
+remain unapproved. The small section-heading correction is consolidated into R15 rather than listed twice.
 
-- Preserve unreadable stores instead of deleting them after container-creation failure. Task 1's migration proof
-  is required regardless of whether this broader recovery redesign is adopted.
-- Remove misleading Edit-button accessibility labels and hide Start Workout for a program with no days.
-- Move the autocomplete and working-max UI tests from `ProgramEditorUITests` to `ExerciseEditorUITests`.
-- Program cloning.
-- Address keyboard dismissal on section headers/navigation titles; these remain known gaps. Real-device and
-  older-runtime behavior remain unverified. The limited simulator VoiceOver findings are recorded in R6 above.
-- Correct the properties section heading in `View+ScrollsToTarget.swift` during an appropriate source cleanup.
+- **K1 — Store preservation/recovery:** preserve unreadable stores instead of deleting them after container-creation
+  failure, and agree on a usable startup failure/retry path. This protects existing data before schema changes;
+  product task 1's migration proof is required regardless of the chosen recovery design. Do not hide a failed
+  migration behind a successful launch with an empty replacement store.
+- **K2 — Toolbar affordances:** remove misleading Edit-button accessibility labels and hide Start Workout for a
+  program with no days. Verify the changed labels and empty/nonempty states in affected UI tests.
+- **K3 — UI test organization:** move the autocomplete and working-max UI tests from `ProgramEditorUITests` to
+  `ExerciseEditorUITests`, alongside the relevant R7/R8 test maintenance.
+- **K4 — Program cloning:** define the copy flow and which values are copied; copied programs and all descendants
+  need independent identities. The feature remains a proposal, not an approved implementation plan.
+- **K5 — Remaining keyboard dismissal:** address section headers/navigation titles while preserving the settled
+  gesture constraints. Real-device and older-runtime behavior remain unverified; R6 records the limited simulator
+  VoiceOver evidence. Estimate again after a supported SwiftUI approach and reproduction are established.
 
 ## Post-v1
 
-Statistics, progression charts, and workout dates/frequency remain deferred. No implementation plan is approved.
+Statistics, progression charts, and workout dates/frequency remain deferred at Q23. No implementation plan is approved.

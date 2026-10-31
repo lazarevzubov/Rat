@@ -11,19 +11,24 @@ single ordered backlog.
 - Program CRUD/autosave, workout persistence and UI, autocomplete, keyboard dismissal fixes, empty Edit button
   handling, and autoscroll are implemented. `ROADMAP.md` distinguishes current behavior from requested changes.
 - The October 29 project review and October 30 code-quality pass are documented under R1–R16 in `ROADMAP.md`.
-  Related small quality items are grouped, including API/test cleanup within R2 and R8. Their remedies and
-  position relative to the existing queue are not approved; recording them did not authorize implementation.
+  Related small quality items are grouped, including API/test cleanup within R2 and R8. The proposed Q1–Q23 queue
+  now ranks the product tasks, review findings, and other backlog by user impact and estimated effort. This is
+  a scheduling proposal; implementation plans and outstanding product decisions remain unapproved.
 
 ## Resume from here
 
-The next implementation task is **exercise-level Increase Next Time**, followed by reliable reminders across
-program days. Their proposed plans and outstanding decisions are in `ROADMAP.md` tasks 1 and 2 and await approval.
-The review also identified a P1 atomicity risk in program replacement (R1); its priority relative to that queue
-needs a decision before implementation.
+The proposed next implementation is **R1: atomic program replacement**, with R9 startup isolation and the needed
+R8 persistence assertions scoped as verification preparation. R3 duplicate-save protection, product task 4's
+unsaved-workout protection, and R5 deletion-error handling follow as impactful, contained fixes. Accept the
+proposed order and approve each scoped plan before implementation.
 
-The ignored-navigation-tap issue needs a device retest alongside that queue; it is not a reason to pause unrelated
-work. Marking completed sets and protecting unsaved workouts follow. Updating program defaults from workout edits
-is also requested; its design and proposed position after those tasks need confirmation.
+Larger data-safety, accessibility, cycling, and workout-flow work follows before lower-impact convenience and
+cleanup tasks. `ROADMAP.md` contains the ranks, effort assumptions, and dependencies. Product task IDs 1–5 remain
+stable; exercise-level reminders no longer lead the queue, and their migration/banner decisions are still open.
+The choice to save only completed sets remains settled.
+
+D1, the ignored-navigation-tap device retest, can accompany relevant UI verification without blocking unrelated
+work. A confirmed navigation failure needs its own scope and impact/effort assessment.
 
 ## Verification needs
 

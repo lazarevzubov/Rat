@@ -42,7 +42,7 @@ The project currently uses Swift 6 language mode and an iOS 18.0 deployment targ
   completion state. Methods express UI intents, such as `handleSaveButtonTap()`, and do not return tasks for tests.
   SwiftUI lifecycle `.task { await viewModel.handleAppear() }` remains appropriate.
 - Views render state and forward intents. Parent view models construct child view models; `RatApp` composes the
-  root dependencies. Previews use `PreviewSupport` factories and stay inside `#if DEBUG`.
+  root dependencies. Previews use `PreviewSupport` factories. Do not wrap `#Preview` blocks in `#if DEBUG`.
 - Prefer simple code and existing conventions over new abstractions. Do not reformat unchanged code. Follow the
   [Swift style guide](https://github.com/lazarevzubov/Ultimate-Swift-Code-Style-Guidelines) and surrounding examples.
   Preserve the existing `// MARK:` organization and `.zero` style; the user wraps doc comments around 140 columns.

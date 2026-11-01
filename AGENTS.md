@@ -14,8 +14,10 @@ Update the maintained documents when a task or decision changes, rather than add
   considerations in the scope; the app currently has no localization or telemetry.
 - Use one `feature/<kebab-description>` or `bugfix/<kebab-description>` branch per distinct change, including local
   work. Leave the resulting diff unstaged for the user's review and edits.
-- Never stage or commit without an explicit go-ahead for that task. Merging requires its own authorization.
-  Staged content means the user reviewed it; it is not permission to commit. Preserve the index when making new edits.
+- Leave changes unstaged so the user can review them before committing. Never stage, commit, or push without
+  explicit approval for that action and task. Requests to implement changes or address PR feedback do not grant
+  commit or push approval; approval for an earlier commit or push does not cover subsequent changes. Merging
+  requires its own authorization. Staged content is not permission to commit. Preserve the index when making new edits.
 - Re-read files before follow-up edits and preserve the user's changes. Review comments may be inline `TODO` or
   `FIXME` comments; search `Rat`, `RatTests`, and `RatUITests` for related comments before reporting a fix complete.
 - On an authorized merge, use `--no-ff`, verify the resulting tree matches the branch tip, then delete the merged

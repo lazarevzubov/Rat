@@ -70,10 +70,13 @@ actor ProgramPersistenceService: ProgramService {
     }
 
     func save(_ program: Program) throws {
-        let context = ModelContext(container)
         let id = program.id
+        let descriptor = FetchDescriptor<ProgramEntity>(predicate: #Predicate { $0.id == id })
 
-        try context.delete(model: ProgramEntity.self, where: #Predicate { $0.id == id })
+        let context = ModelContext(container)
+        for entity in try context.fetch(descriptor) {
+            context.delete(entity)
+        }
         context.insert(makeEntity(program: program))
 
         try context.save()

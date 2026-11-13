@@ -30,6 +30,7 @@ struct ActiveWorkoutView: View {
                 }
             }
         }
+            .disabled(viewModel.editingDisabled)
             .scrollDismissesKeyboard(.immediately)
             .onTouchBelowContent { focusedField = nil }
             .navigationTitle(viewModel.session?.dayName ?? "Workout")
@@ -41,8 +42,15 @@ struct ActiveWorkoutView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { viewModel.handleSaveButtonTap() }
-                        .disabled(viewModel.session == nil)
+                    Button(
+                        viewModel.saving
+                            ? "Saving…"
+                            : "Save"
+                    ) {
+                        focusedField = nil
+                        viewModel.handleSaveButtonTap()
+                    }
+                        .disabled(viewModel.saveButtonDisabled)
                 }
             }
             .task { await viewModel.handleAppear() }

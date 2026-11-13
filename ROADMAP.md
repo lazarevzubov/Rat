@@ -1,7 +1,7 @@
 # Rat — Design and remaining work
 
-Updated November 1, 2026. This is the maintained backlog of current behavior, ordered remaining work, and
-pending decisions. Recommendations and unresolved decisions are labeled explicitly.
+Updated November 13, 2026. This is the maintained backlog of current behavior, ordered remaining work, and pending
+decisions. Recommendations and unresolved decisions are labeled explicitly.
 
 ## Current product and model
 
@@ -36,8 +36,9 @@ Re-estimate uncertain items after a scoped plan. Grouped entries can require sev
 task still follows the change-size limits and verification rules in `AGENTS.md`.
 
 **Q1–Q22 are proposed execution ranks.** Product tasks **1–5** and remaining review IDs retain their stable
-references, not execution positions. K1–K5 identify the other backlog items below. Implementation plans and
-pending product decisions still need approval. The choice to save only completed sets remains settled.
+references, not execution positions. K1–K5 identify the other backlog items below. R3's scoped plan below is approved;
+other implementation plans and pending product decisions still need approval. The choice to save only completed sets
+remains settled.
 
 ### High impact, easier fixes
 
@@ -179,9 +180,9 @@ The row `simultaneousGesture` is a suspect, not a confirmed cause or an approved
 
 ## Project review findings
 
-The proposed queue assigns execution ranks using user impact, effort, and dependencies. Implementation plans
-remain unapproved and the product tasks' pending decisions remain open. Priority labels record severity;
-they are distinct from Q-ranks and effort estimates.
+The proposed queue assigns execution ranks using user impact, effort, and dependencies. Except for R3's scoped plan
+below, implementation plans remain unapproved; the product tasks' pending decisions remain open. Priority labels record
+severity; they are distinct from Q-ranks and effort estimates.
 
 Each follow-up needs its own scoped plan, branch, regression coverage, and verification under `AGENTS.md`.
 Schema changes also require the on-disk migration proof described in task 1. Suggested remedies below are options
@@ -206,14 +207,33 @@ Keep lifecycle correctness coverage above distinct from merely testing that the 
 
 ### R3. [P2] Prevent duplicate workout saves
 
-[ActiveWorkoutViewModel.swift](Rat/UI/ActiveWorkout/ActiveWorkoutViewModel.swift) allows overlapping Save tasks,
-and [WorkoutSessionService.swift](Rat/Service/WorkoutSessionService.swift) always inserts a new entity graph.
+At baseline, [ActiveWorkoutViewModel.swift](Rat/UI/ActiveWorkout/ActiveWorkoutViewModel.swift) allowed overlapping Save
+tasks, and [WorkoutSessionService.swift](Rat/Service/WorkoutSessionService.swift) always inserted a new entity graph.
 Saving the identical session twice duplicated stored sessions in an iOS in-memory probe. A separate macOS on-disk
 probe counted two sessions, two logged exercises, and two logged sets with the same domain identifiers.
 
 Guard in-flight saves and make persistence idempotent for a session identifier. Cover repeated taps, repeated
 service calls, and retry after failure; define the visible and accessible saving state. This is separate from
 task 3's completed-set filtering and empty-save guard.
+
+**Approved November 4, 2026**, on `bugfix/prevent-duplicate-workout-saves`, in separate commits. Pause after each step
+to show its unstaged diff for review before committing; preserve the local signing settings and index.
+
+1. Add a synchronous in-flight/completed guard, capture the accepted session, disable editing during saving, and show a
+   native accessible “Saving…” button. Cover saving state, repeated taps, completion, and failure/retry with focused VM
+   tests, including R8's missing completion assertion. Step 1's review fixes name progress `saving` and move the
+   `editingDisabled`/`saveButtonDisabled` policies into the VM. All 22 scoped VM tests and the Release device build
+   passed. The user approved step 1 for a commit and pull request on November 13; the draft PR covers this step.
+2. Replace existing session graphs with the same ID in one context save, following the program service's convention.
+   Verify nested counts/values, unrelated-session preservation, and failure/retry; make the workout double's saved state
+   fetchable while retaining its call log. Skipping existing IDs was rejected because it silently ignores corrected
+   values. The shared actor serializes saves; this adds no database uniqueness constraint.
+3. Repair the workout UI helper's relevant R7 Back selectors and verify save/dismissal and keyboard behavior.
+4. Finish scoped verification, critically review the result, and update the maintained checkpoint/backlog.
+
+Each step stays under 500 changed lines. Use a dedicated simulator and scratch DerivedData, demonstrate relevant
+regressions in scratch copies, and check a Release device build. No schema, localization, or telemetry changes are
+needed. Real-device/older-runtime and spoken VoiceOver checks must be reported as unverified unless performed.
 
 ### R4. [P2] Preserve workout cycling when days are reordered or deleted
 
@@ -266,14 +286,11 @@ ignored-navigation-tap issue awaiting a device retest above.
 
 **Save completion:**
 
-`handleSaveButtonTap_succeeds_setsDidSave` in
-[ActiveWorkoutViewModelTests.swift](RatTests/Tests/ActiveWorkoutViewModelTests.swift) only calls `waitFor`.
-[WaitFor.swift](RatTests/WaitFor.swift) returns normally when its deadline expires, so the test cannot fail when
-`didSave` stays false. Removing the production `didSave = true` assignment in a scratch copy still left all twelve
-workout VM tests passing; this test merely waited about five seconds.
-
-Add a final `#expect` for the completion state with a message. Repeat the scratch mutation to demonstrate that
-the corrected test detects the regression, then run the relevant unmodified VM tests.
+R3 step 1 adds the missing final assertion to `handleSaveButtonTap_succeeds_setsDidSave` in
+[ActiveWorkoutViewModelTests.swift](RatTests/Tests/ActiveWorkoutViewModelTests.swift), pending review.
+[WaitFor.swift](RatTests/WaitFor.swift) returns normally on timeout, so the baseline test could pass with `didSave`
+remaining false. Removing `didSave = true` in a scratch copy now fails the corrected completion test. Removing only the
+in-flight guard in a separate scratch experiment also fails the duplicate-tap test.
 
 **Related test-quality cleanup:**
 

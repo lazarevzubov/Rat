@@ -23,6 +23,20 @@ struct ActiveWorkoutViewModelTests {
     }
 
     @Test
+    func handleAppear_sessionLoaded_enablesEditingAndSaving() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: WorkoutSessionStubService())
+
+        await viewModel.handleAppear()
+
+        #expect(
+            !viewModel.editingDisabled
+                && !viewModel.saveButtonDisabled,
+            "A loaded session can be edited and saved."
+        )
+    }
+
+    @Test
     func handleAppear_priorSession_seedsNextDayInCycle() async {
         let program = Program(
             name: "Push Pull Legs",
@@ -180,6 +194,112 @@ struct ActiveWorkoutViewModelTests {
         viewModel.handleSaveButtonTap()
 
         await waitFor { viewModel.didSave }
+        #expect(viewModel.didSave, "A successful save tells the view to dismiss.")
+    }
+
+    @Test
+    func handleSaveButtonTap_noSession_doesNotStartSaving() {
+        let viewModel = ActiveWorkoutViewModel(
+            program: Program(name: "Push Pull Legs"), workoutSessionService: WorkoutSessionStubService()
+        )
+        viewModel.handleSaveButtonTap()
+
+        #expect(
+            !viewModel.saving
+                && !viewModel.editingDisabled
+                && viewModel.saveButtonDisabled,
+            "Without a session, Save stays disabled without starting a save or locking editing."
+        )
+    }
+
+    @Test
+    func handleSaveButtonTap_beforeTaskStarts_setsSaving() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: WorkoutSessionStubService())
+
+        await viewModel.handleAppear()
+        viewModel.handleSaveButtonTap()
+
+        #expect(
+            viewModel.saving
+                && viewModel.editingDisabled
+                && viewModel.saveButtonDisabled,
+            "Saving synchronously disables editing and Save before another tap can start a save."
+        )
+    }
+
+    @Test
+    func handleSaveButtonTap_repeatedTaps_persistsSessionOnce() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+        let service = WorkoutSessionStubService()
+
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: service)
+        await viewModel.handleAppear()
+
+        viewModel.handleSaveButtonTap()
+        viewModel.handleSaveButtonTap()
+
+        await waitFor { viewModel.didSave }
+        #expect(
+            await service.savedSessions.map(\.id) == [viewModel.session?.id],
+            "Repeated taps persist the active session only once."
+        )
+    }
+
+    @Test
+    func handleSaveButtonTap_sessionChangesBeforeTaskStarts_persistsAcceptedSnapshot() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+        let service = WorkoutSessionStubService()
+
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: service)
+        await viewModel.handleAppear()
+
+        let sessionID = viewModel.session?.id
+
+        viewModel.handleSaveButtonTap()
+        viewModel.session = nil
+
+        await waitFor { viewModel.didSave }
+        #expect(
+            await service.savedSessions.map(\.id) == [sessionID],
+            "The save uses the session snapshot accepted when Save was tapped."
+        )
+    }
+
+    @Test
+    func handleSaveButtonTap_succeeds_clearsSaving() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: WorkoutSessionStubService())
+
+        await viewModel.handleAppear()
+        viewModel.handleSaveButtonTap()
+
+        await waitFor { viewModel.didSave }
+        #expect(
+            viewModel.didSave
+                && !viewModel.saving
+                && viewModel.editingDisabled
+                && viewModel.saveButtonDisabled,
+            "After saving finishes, editing and Save stay disabled until dismissal."
+        )
+    }
+
+    @Test
+    func handleSaveButtonTap_alreadySaved_doesNotStartSavingAgain() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: WorkoutSessionStubService())
+        await viewModel.handleAppear()
+
+        viewModel.handleSaveButtonTap()
+        await waitFor { viewModel.didSave }
+
+        viewModel.handleSaveButtonTap()
+        #expect(
+            viewModel.didSave
+                && !viewModel.saving,
+            "A completed session cannot start another save while dismissal is pending."
+        )
     }
 
     @Test
@@ -212,6 +332,79 @@ struct ActiveWorkoutViewModelTests {
         await waitFor { viewModel.presentedError != nil }
 
         #expect(!viewModel.didSave, "A failed save doesn't tell the view to dismiss.")
+    }
+
+    @Test
+    func handleSaveButtonTap_fails_clearsSaving() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+
+        let service = WorkoutSessionStubService()
+        await service.setSaveError(TestError())
+
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: service)
+        await viewModel.handleAppear()
+
+        viewModel.handleSaveButtonTap()
+        await waitFor { viewModel.presentedError != nil }
+
+        #expect(
+            (viewModel.presentedError is TestError)
+                && !viewModel.saving
+                && !viewModel.editingDisabled
+                && !viewModel.saveButtonDisabled,
+            "A failed save clears the saving state and enables editing and Save for another attempt."
+        )
+    }
+
+    @Test
+    func handleSaveButtonTap_retryAfterFailure_savesSuccessfully() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+
+        let service = WorkoutSessionStubService()
+        await service.setSaveError(TestError())
+
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: service)
+        await viewModel.handleAppear()
+
+        viewModel.handleSaveButtonTap()
+        await waitFor { viewModel.presentedError != nil }
+
+        let didFail = viewModel.presentedError is TestError
+
+        await service.setSaveError(nil)
+        viewModel.handleSaveButtonTap()
+
+        await waitFor { viewModel.didSave }
+        #expect(
+            didFail
+                && viewModel.didSave,
+            "A failed save can be retried successfully."
+        )
+    }
+
+    @Test
+    func handleSaveButtonTap_retryAfterFailure_clearsPresentedError() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+
+        let service = WorkoutSessionStubService()
+        await service.setSaveError(TestError())
+
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: service)
+        await viewModel.handleAppear()
+
+        viewModel.handleSaveButtonTap()
+        await waitFor { viewModel.presentedError != nil }
+
+        let didFail = viewModel.presentedError is TestError
+
+        await service.setSaveError(nil)
+        viewModel.handleSaveButtonTap()
+
+        #expect(
+            didFail
+                && (viewModel.presentedError == nil),
+            "Starting a retry clears the previous save error."
+        )
     }
 
 }

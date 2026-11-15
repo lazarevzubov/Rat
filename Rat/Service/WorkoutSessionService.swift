@@ -11,7 +11,7 @@ protocol WorkoutSessionService: Actor {
     /// - Returns: The most recently logged session, or `nil` if none has been logged yet.
     /// - Throws: An error if the fetch failed.
     func fetchMostRecentSession(forProgramWithID programID: UUID) throws -> WorkoutSession?
-    /// Persists a workout session.
+    /// Persists a workout session, replacing any existing session with the same ID.
     /// - Parameter session: The session to persist.
     /// - Throws: An error if the change couldn't be persisted.
     func save(_ session: WorkoutSession) throws
@@ -54,9 +54,16 @@ actor WorkoutSessionPersistenceService: WorkoutSessionService {
     }
 
     func save(_ session: WorkoutSession) throws {
+        let id = session.id
+        let descriptor = FetchDescriptor<WorkoutSessionEntity>(predicate: #Predicate { $0.id == id })
+
         let context = ModelContext(container)
 
+        for entity in try context.fetch(descriptor) {
+            context.delete(entity)
+        }
         context.insert(makeEntity(session: session))
+
         try context.save()
     }
 

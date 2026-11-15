@@ -58,6 +58,32 @@ struct ActiveWorkoutViewModelTests {
     }
 
     @Test
+    func handleAppear_afterSavingWorkout_seedsNextDayInCycle() async {
+        let program = Program(
+            name: "Push Pull Legs",
+            dayTemplates: [
+                DayTemplate(name: "Push", position: 0),
+                DayTemplate(name: "Pull", position: 1)
+            ]
+        )
+        let service = WorkoutSessionStubService()
+        let firstWorkout = ActiveWorkoutViewModel(program: program, workoutSessionService: service)
+
+        await firstWorkout.handleAppear()
+        firstWorkout.handleSaveButtonTap()
+        await waitFor { firstWorkout.didSave }
+
+        let nextWorkout = ActiveWorkoutViewModel(program: program, workoutSessionService: service)
+        await nextWorkout.handleAppear()
+
+        #expect(
+            firstWorkout.didSave
+                && (nextWorkout.session?.dayName == "Pull"),
+            "A saved workout becomes fetchable history when starting the next workout."
+        )
+    }
+
+    @Test
     func handleAppear_priorSessionWasLastDay_wrapsToFirstDay() async {
         let program = Program(
             name: "Push Pull Legs",

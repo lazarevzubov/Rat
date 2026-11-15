@@ -1,6 +1,6 @@
 # Rat — Design and remaining work
 
-Updated November 13, 2026. This is the maintained backlog of current behavior, ordered remaining work, and pending
+Updated November 15, 2026. This is the maintained backlog of current behavior, ordered remaining work, and pending
 decisions. Recommendations and unresolved decisions are labeled explicitly.
 
 ## Current product and model
@@ -216,18 +216,17 @@ Guard in-flight saves and make persistence idempotent for a session identifier. 
 service calls, and retry after failure; define the visible and accessible saving state. This is separate from
 task 3's completed-set filtering and empty-save guard.
 
-**Approved November 4, 2026**, on `bugfix/prevent-duplicate-workout-saves`, in separate commits. Pause after each step
-to show its unstaged diff for review before committing; preserve the local signing settings and index.
+**Approved plan**, on `bugfix/prevent-duplicate-workout-saves`, in separate commits. Pause after each step to show its
+unstaged diff for review before committing; preserve the local signing settings and index.
 
 1. Add a synchronous in-flight/completed guard, capture the accepted session, disable editing during saving, and show a
    native accessible “Saving…” button. Cover saving state, repeated taps, completion, and failure/retry with focused VM
-   tests, including R8's missing completion assertion. Step 1's review fixes name progress `saving` and move the
-   `editingDisabled`/`saveButtonDisabled` policies into the VM. All 22 scoped VM tests and the Release device build
-   passed. The user approved step 1 for a commit and pull request on November 13; the draft PR covers this step.
+   tests, including R8's missing completion assertion. Complete in commit `87806be`, published in draft PR #5.
 2. Replace existing session graphs with the same ID in one context save, following the program service's convention.
    Verify nested counts/values, unrelated-session preservation, and failure/retry; make the workout double's saved state
    fetchable while retaining its call log. Skipping existing IDs was rejected because it silently ignores corrected
-   values. The shared actor serializes saves; this adds no database uniqueness constraint.
+   values. The shared actor serializes saves; this adds no database uniqueness constraint. Complete;
+   `HANDOFF.md` records current verification and limits.
 3. Repair the workout UI helper's relevant R7 Back selectors and verify save/dismissal and keyboard behavior.
 4. Finish scoped verification, critically review the result, and update the maintained checkpoint/backlog.
 
@@ -286,28 +285,25 @@ ignored-navigation-tap issue awaiting a device retest above.
 
 **Save completion:**
 
-R3 step 1 adds the missing final assertion to `handleSaveButtonTap_succeeds_setsDidSave` in
-[ActiveWorkoutViewModelTests.swift](RatTests/Tests/ActiveWorkoutViewModelTests.swift), pending review.
+R3 step 1's commit `87806be` adds the missing final assertion to `handleSaveButtonTap_succeeds_setsDidSave` in
+[ActiveWorkoutViewModelTests.swift](RatTests/Tests/ActiveWorkoutViewModelTests.swift).
 [WaitFor.swift](RatTests/WaitFor.swift) returns normally on timeout, so the baseline test could pass with `didSave`
 remaining false. Removing `didSave = true` in a scratch copy now fails the corrected completion test. Removing only the
 in-flight guard in a separate scratch experiment also fails the duplicate-tap test.
 
 **Related test-quality cleanup:**
 
-- The nested round-trip tests in
-  [WorkoutSessionPersistenceServiceTests.swift](RatTests/Tests/WorkoutSessionPersistenceServiceTests.swift)
-  assert only the first exercise's name. Losing every set or changing set values and identifiers would still
-  satisfy those assertions. Use multiple siblings and both set kinds, with focused checks of nested values,
-  identifiers, and ordering. Preserve the one-assertion-per-unit-test convention.
+- R3 step 2 strengthens the nested round-trip and replacement tests in
+  [WorkoutSessionPersistenceServiceTests.swift](RatTests/Tests/WorkoutSessionPersistenceServiceTests.swift), pending
+  review. They now check every nested value and identifier with exercise siblings, both set kinds, ordering,
+  replacement additions/removals, and persisted graph counts. The baseline checked only the first exercise's name.
 - The hierarchy-saving UI test in
   [ProgramEditorUITests.swift](RatUITests/Tests/ProgramEditorUITests.swift) should also inspect the saved hierarchy
   after reopening it, rather than checking only the program's list label. It also uses the fragile positional
   navigation tracked in R7.
-- [WorkoutSessionStubService.swift](RatTests/Mocks/WorkoutSessionStubService.swift) fetches from `sessions`, but
-  saving only appends to `savedSessions`. In contrast, the program service double updates its fetchable state.
-  Either make the workout double stateful too, retaining the call log if useful, or explicitly distinguish a
-  configured stub from a stateful fake. Verify that the chosen contract supports save-then-start-next-workout
-  sequences without silently depending on manually reseeded history.
+- R3 step 2 makes [WorkoutSessionStubService.swift](RatTests/Mocks/WorkoutSessionStubService.swift) replace fetchable
+  sessions by ID while retaining `savedSessions` as successful-call history, pending review. A VM regression saves a
+  workout and starts the next one without reseeding history; the baseline double fails this regression.
 
 These additional observations are coverage and test-double design gaps, not demonstrated production defects.
 Coordinate mutation-based autosave tests with R2, and keep the UI disappearance expectation tracked in R12.

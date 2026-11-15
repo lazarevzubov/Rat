@@ -41,6 +41,10 @@ actor WorkoutSessionStubService: WorkoutSessionService {
         if let saveError {
             throw saveError
         }
+
+        sessions.removeAll { $0.id == session.id }
+
+        sessions.append(session)
         savedSessions.append(session)
     }
 

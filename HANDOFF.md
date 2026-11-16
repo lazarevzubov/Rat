@@ -14,11 +14,12 @@ single ordered backlog.
 
 **R3: prevent duplicate workout saves** is in progress on `bugfix/prevent-duplicate-workout-saves`.
 [Draft PR #5](https://github.com/lazarevzubov/Rat/pull/5) tracks the change. Steps 1–2 implement the save guard and
-saving UI state, atomic same-ID session replacement, persistence regressions, and a stateful workout double.
+saving UI state, atomic same-ID session replacement, persistence regressions, and a stateful workout double. The
+published branch is at step 2, commit `18a9ab4`.
 
-Continue with the approved workout UI Back-selector repairs and runtime UI verification (step 3), then final
-verification and documentation (step 4). Keep later steps in separate commits and show each unstaged diff for review
-before committing; no merge is authorized.
+Step 3 is local: the workout UI helper selects the native Back control explicitly and waits for each destination; the
+save scenario checks keyboard and sheet disappearance. Its targeted UI checks passed; review its unstaged diff before
+committing. Final verification and documentation (step 4) remain; no merge is authorized.
 
 Product task 4's unsaved-workout protection and R5 deletion-error handling follow R3 and still need scoped-plan approval.
 `ROADMAP.md` holds the ordered backlog and pending product decisions; saving only completed sets remains settled.
@@ -36,8 +37,13 @@ On-disk failure/retry and atomic replacement checks passed. Retain the disk fixt
 `/tmp/rat-r3-step2-on-disk-artifacts` and scratch regression harness at `/tmp/rat-r3-step2-regression`. Serialization
 covers the shared service actor; there is no database uniqueness constraint across service instances.
 
-Runtime UI and spoken VoiceOver checks remain unverified, as do real-device and older-runtime behavior. Repair the
-relevant R7 Back queries before relying on the workout UI tests. Follow `AGENTS.md` for scoped verification.
+All seven workout UI cases passed on iOS 27.2. Passing results are `/tmp/rat-r3-step3-save-smoke.xcresult` and
+`/tmp/rat-r3-step3-keyboard-tests.xcresult`. A scratch copy with a delayed save also confirmed the native saving label,
+disabled controls, keyboard dismissal, and eventual sheet dismissal. Its source is `/tmp/rat-r3-step3-saving-probe`; the
+passing result is `/tmp/rat-r3-step3-saving-probe-final.xcresult`.
+
+Spoken VoiceOver and real-device behavior remain unverified. The iOS 27.1 automation probe encountered app-idle and
+accessibility failures, so the repaired flow remains unverified there. Follow `AGENTS.md` for scoped verification.
 
 ## Persistence
 

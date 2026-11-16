@@ -225,9 +225,10 @@ unstaged diff for review before committing; preserve the local signing settings 
 2. Replace existing session graphs with the same ID in one context save, following the program service's convention.
    Verify nested counts/values, unrelated-session preservation, and failure/retry; make the workout double's saved state
    fetchable while retaining its call log. Skipping existing IDs was rejected because it silently ignores corrected
-   values. The shared actor serializes saves; this adds no database uniqueness constraint. Complete;
+   values. The shared actor serializes saves; this adds no database uniqueness constraint. Complete in `18a9ab4`;
    `HANDOFF.md` records current verification and limits.
 3. Repair the workout UI helper's relevant R7 Back selectors and verify save/dismissal and keyboard behavior.
+   Implemented and verified on iOS 27.2; awaiting diff review before its separate commit.
 4. Finish scoped verification, critically review the result, and update the maintained checkpoint/backlog.
 
 Each step stays under 500 changed lines. Use a dedicated simulator and scratch DerivedData, demonstrate relevant
@@ -271,15 +272,14 @@ dismissal behavior. Real-device VoiceOver interaction remains unverified.
 
 ### R7. Replace positional Back-button queries in UI tests
 
-[ActiveWorkoutUITests.swift](RatUITests/Tests/ActiveWorkoutUITests.swift) and
-[ProgramEditorUITests.swift](RatUITests/Tests/ProgramEditorUITests.swift) use
-`navigationBars[...].buttons.element(boundBy: 0)` to navigate back. On iOS 27.1,
-`testTappingWeightField_keepsKeyboard` tapped Edit instead of Back, then failed looking for the expected day
-navigation bar. It never reached the workout behavior under test.
+[ProgramEditorUITests.swift](RatUITests/Tests/ProgramEditorUITests.swift) still has five positional Back queries.
+Replace them with the intended native control and wait for each destination. A positional query can tap Edit and
+prevent the test from reaching the behavior it intends to verify.
 
-Locate the intended back control explicitly and wait for the destination. Search all UI tests for the same
-assumption and rerun the affected scenarios. This observed test-selector failure is separate from the reported
-ignored-navigation-tap issue awaiting a device retest above.
+R3 step 3 replaces the two relevant queries in
+[ActiveWorkoutUITests.swift](RatUITests/Tests/ActiveWorkoutUITests.swift) with the observed native `BackButton`
+identifier and destination waits. The iOS 27.1 automation probe hit app-idle/accessibility failures; corrected-flow
+verification there remains open. This is separate from the reported ignored-navigation-tap device retest.
 
 ### R8. Strengthen test assertions and service doubles
 
@@ -294,15 +294,15 @@ in-flight guard in a separate scratch experiment also fails the duplicate-tap te
 **Related test-quality cleanup:**
 
 - R3 step 2 strengthens the nested round-trip and replacement tests in
-  [WorkoutSessionPersistenceServiceTests.swift](RatTests/Tests/WorkoutSessionPersistenceServiceTests.swift), pending
-  review. They now check every nested value and identifier with exercise siblings, both set kinds, ordering,
+  [WorkoutSessionPersistenceServiceTests.swift](RatTests/Tests/WorkoutSessionPersistenceServiceTests.swift).
+  They now check every nested value and identifier with exercise siblings, both set kinds, ordering,
   replacement additions/removals, and persisted graph counts. The baseline checked only the first exercise's name.
 - The hierarchy-saving UI test in
   [ProgramEditorUITests.swift](RatUITests/Tests/ProgramEditorUITests.swift) should also inspect the saved hierarchy
   after reopening it, rather than checking only the program's list label. It also uses the fragile positional
   navigation tracked in R7.
 - R3 step 2 makes [WorkoutSessionStubService.swift](RatTests/Mocks/WorkoutSessionStubService.swift) replace fetchable
-  sessions by ID while retaining `savedSessions` as successful-call history, pending review. A VM regression saves a
+  sessions by ID while retaining `savedSessions` as successful-call history. A VM regression saves a
   workout and starts the next one without reseeding history; the baseline double fails this regression.
 
 These additional observations are coverage and test-double design gaps, not demonstrated production defects.

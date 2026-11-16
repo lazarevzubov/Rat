@@ -29,11 +29,19 @@ final class ActiveWorkoutUITests: XCTestCase {
         toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
         XCTAssertEqual(toggle.value as? String, "1", "The set is flagged to increase next time.")
 
+        app.textFields["Weight"].tap()
+        let keyboard = app.keyboards.element
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5.0), "The weight keyboard is visible before saving.")
+
         app.buttons["Save"].tap()
         XCTAssertTrue(
             app.navigationBars["Push Pull Legs"].waitForExistence(timeout: 5.0),
             "Saving the workout dismisses back to the program editor it was started from."
         )
+        XCTAssertTrue(
+            app.navigationBars["Push"].waitForNonExistence(timeout: 5.0), "The saved workout sheet disappears."
+        )
+        XCTAssertTrue(keyboard.waitForNonExistence(timeout: 5.0), "Saving dismisses the weight keyboard.")
 
         app.buttons["Start Workout"].tap()
         XCTAssertTrue(app.navigationBars["Push"].waitForExistence(timeout: 5.0), "The day cycles back around to Push.")
@@ -162,6 +170,8 @@ final class ActiveWorkoutUITests: XCTestCase {
         nameField.tap()
         nameField.typeText(name)
 
+        XCTAssertEqual(nameField.value as? String, name, "The program name is entered before adding its day.")
+
         app.buttons["Add Day"].tap()
 
         let dayLink = app.buttons["Untitled Day"]
@@ -171,6 +181,8 @@ final class ActiveWorkoutUITests: XCTestCase {
         let dayNameField = app.textFields["Day Name"]
         dayNameField.tap()
         dayNameField.typeText("Push")
+
+        XCTAssertEqual(dayNameField.value as? String, "Push", "The day name is entered before adding its exercise.")
 
         app.buttons["Add Exercise"].tap()
 
@@ -182,11 +194,30 @@ final class ActiveWorkoutUITests: XCTestCase {
         exerciseNameField.tap()
         exerciseNameField.typeText("Bench Press")
 
+        XCTAssertEqual(
+            exerciseNameField.value as? String,
+            "Bench Press",
+            "The exercise name is entered before adding its set."
+        )
+
         app.buttons["Add Set"].tap()
         XCTAssertTrue(app.textFields["% of Max"].waitForExistence(timeout: 5.0), "A working set is added by default.")
 
-        app.navigationBars["Bench Press"].buttons.element(boundBy: 0).tap()
-        app.navigationBars["Push"].buttons.element(boundBy: 0).tap()
+        let exerciseBackButton = app.navigationBars["Bench Press"].buttons["BackButton"]
+        XCTAssertTrue(exerciseBackButton.waitForExistence(timeout: 5.0), "The exercise editor exposes its Back button.")
+
+        exerciseBackButton.tap()
+        XCTAssertTrue(
+            app.navigationBars["Push"].waitForExistence(timeout: 5.0), "Back returns to the day editor."
+        )
+
+        let dayBackButton = app.navigationBars["Push"].buttons["BackButton"]
+        XCTAssertTrue(dayBackButton.waitForExistence(timeout: 5.0), "The day editor exposes its Back button.")
+
+        dayBackButton.tap()
+        XCTAssertTrue(
+            app.navigationBars[name].waitForExistence(timeout: 5.0), "Back returns to the program editor."
+        )
         app.buttons["Done"].tap()
 
         XCTAssertTrue(app.staticTexts[name].waitForExistence(timeout: 5.0), "The saved program appears in the list.")

@@ -1,33 +1,30 @@
 # Rat — Current handoff
 
-Updated November 15, 2026. Read [AGENTS.md](AGENTS.md) for working agreements and [ROADMAP.md](ROADMAP.md) for the
+Updated November 16, 2026. Read [AGENTS.md](AGENTS.md) for working agreements and [ROADMAP.md](ROADMAP.md) for the
 single ordered backlog.
 
 ## Current checkpoint
 
 - Local signing settings include `DEVELOPMENT_TEAM = N4WG592BBR` in two app build configurations. Preserve them
   and keep them out of commits. Check `git status` before relying on this snapshot.
-- `ROADMAP.md` describes current behavior and ranks remaining work at Q1–Q22. R3's scoped plan is approved; the other
-  implementation plans and outstanding product decisions still need approval.
+- `ROADMAP.md` describes current behavior and ranks remaining work at Q1–Q21. Remaining implementation plans and
+  outstanding product decisions still need approval.
 
 ## Resume from here
 
-**R3: prevent duplicate workout saves** is in progress on `bugfix/prevent-duplicate-workout-saves`.
-[Draft PR #5](https://github.com/lazarevzubov/Rat/pull/5) tracks the change. Steps 1–2 implement the save guard and
-saving UI state, atomic same-ID session replacement, persistence regressions, and a stateful workout double. The
-published branch is at step 2, commit `18a9ab4`.
+**R3: prevent duplicate workout saves** is implemented and its scoped verification is complete on
+`bugfix/prevent-duplicate-workout-saves`, tracked by [draft PR #5](https://github.com/lazarevzubov/Rat/pull/5). The save
+guard, saving UI state, atomic same-ID replacement, regression coverage, and workout UI checks are published. The final
+checkpoint/backlog update is the separate fourth step. No merge is authorized.
 
-Step 3 is local: the workout UI helper selects the native Back control explicitly and waits for each destination; the
-save scenario checks keyboard and sheet disappearance. Its targeted UI checks passed; review its unstaged diff before
-committing. Final verification and documentation (step 4) remain; no merge is authorized.
-
-Product task 4's unsaved-workout protection and R5 deletion-error handling follow R3 and still need scoped-plan approval.
-`ROADMAP.md` holds the ordered backlog and pending product decisions; saving only completed sets remains settled.
+Next is product task 4's unsaved-workout protection, followed by R5 deletion-error handling. Both need scoped-plan
+approval. `ROADMAP.md` holds the ordered backlog and pending product decisions; saving only completed sets remains
+settled.
 
 D1, the ignored-navigation-tap device retest, can accompany relevant UI verification without blocking unrelated
 work. A confirmed navigation failure needs its own scope and impact/effort assessment.
 
-## Verification needs
+## Verification evidence and limits
 
 The 12 persistence cases and 23 workout VM tests passed on the dedicated iOS 27.2 `Rat-R3` simulator
 (`212940A8-FA43-4731-9122-E33D7FA62AAB`). An unsigned Release device build also passed. Results are under

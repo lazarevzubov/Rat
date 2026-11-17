@@ -7,6 +7,16 @@ final class ActiveWorkoutViewModel {
 
     // MARK: - Properties
 
+    /// Whether the workout's editing controls are disabled.
+    var editingDisabled: Bool {
+        saving
+            || didSave
+    }
+    /// Whether the Save button is disabled.
+    var saveButtonDisabled: Bool {
+        (session == nil)
+            || editingDisabled
+    }
     /// The session being logged today.
     var session: WorkoutSession?
     /// Set to `true` once the session has been saved, telling the view it should dismiss itself.
@@ -15,6 +25,8 @@ final class ActiveWorkoutViewModel {
     private(set) var flaggedExerciseNames = Set<String>()
     /// The error from the most recently failed load or save, if any.
     private(set) var presentedError: Error?
+    /// Whether the session is currently being saved.
+    private(set) var saving = false
 
     // MARK: Private properties
 
@@ -62,10 +74,16 @@ final class ActiveWorkoutViewModel {
 
     /// Handles a tap on the Save button.
     func handleSaveButtonTap() {
+        guard let session,
+              !saveButtonDisabled else {
+            return
+        }
+
+        saving = true
+        presentedError = nil
+
         Task {
-            guard let session else {
-                return
-            }
+            defer { saving = false }
             do {
                 try await workoutSessionService.save(session)
                 didSave = true

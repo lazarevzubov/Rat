@@ -7,10 +7,21 @@ final class ActiveWorkoutViewModel {
 
     // MARK: - Properties
 
+    /// Whether the Cancel button is disabled.
+    var cancelButtonDisabled: Bool {
+        saving
+            || shouldDismiss
+    }
     /// Whether the workout's editing controls are disabled.
     var editingDisabled: Bool {
         saving
-            || didSave
+            || shouldDismiss
+    }
+    /// Whether interactive sheet dismissal is blocked to protect the current workout.
+    var interactiveDismissDisabled: Bool {
+        saving
+            || ((session != nil)
+                    && !shouldDismiss)
     }
     /// Whether the Save button is disabled.
     var saveButtonDisabled: Bool {
@@ -19,6 +30,11 @@ final class ActiveWorkoutViewModel {
     }
     /// The session being logged today.
     var session: WorkoutSession?
+    /// Whether the view should dismiss after saving or cancellation.
+    var shouldDismiss: Bool {
+        didSave
+            || didDiscard
+    }
     /// Set to `true` once the session has been saved, telling the view it should dismiss itself.
     private(set) var didSave = false
     /// The exercise names the view should show an "increase next time" banner for.
@@ -27,12 +43,15 @@ final class ActiveWorkoutViewModel {
     private(set) var presentedError: Error?
     /// Whether the session is currently being saved.
     private(set) var saving = false
+    /// Whether the view should ask before discarding the workout.
+    private(set) var showingDiscardConfirmation = false
 
     // MARK: Private properties
 
     private let program: Program
     private let weightSuggestionModel = WeightSuggestionModel()
     private let workoutSessionService: WorkoutSessionService
+    private var didDiscard = false
 
     // MARK: - Initialization
 
@@ -50,11 +69,16 @@ final class ActiveWorkoutViewModel {
     /// Handles this view appearing: loads the most recently logged session, then seeds today's session from the next day template in the program's
     /// cycle.
     func handleAppear() async {
-        guard let sortedDayTemplates else {
+        guard !shouldDismiss,
+              let sortedDayTemplates else {
             return
         }
         do {
             let mostRecentSession = try await workoutSessionService.fetchMostRecentSession(forProgramWithID: program.id)
+            guard !shouldDismiss else {
+                return
+            }
+
             flaggedExerciseNames = Set(
                 (mostRecentSession?.loggedExercises ?? [])
                     .filter { $0.loggedSets.contains { $0.increaseNextTime } }
@@ -63,13 +87,43 @@ final class ActiveWorkoutViewModel {
 
             session = makeSession(dayTemplate: nextDayTemplate(in: sortedDayTemplates, after: mostRecentSession))
         } catch {
-            presentedError = error
+            if !shouldDismiss {
+                presentedError = error
+            }
         }
     }
 
     /// Dismisses the current error, if any.
     func dismissPresentedError() {
         presentedError = nil
+    }
+
+    /// Handles a tap on Cancel, asking for confirmation when a workout has been seeded.
+    func handleCancelButtonTap() {
+        guard !cancelButtonDisabled else {
+            return
+        }
+        if session == nil {
+            didDiscard = true
+        } else {
+            showingDiscardConfirmation = true
+        }
+    }
+
+    /// Handles keeping the workout or dismissing its discard confirmation.
+    func handleKeepWorkingOutButtonTap() {
+        showingDiscardConfirmation = false
+    }
+
+    /// Handles confirmed discard without saving the workout.
+    func handleDiscardWorkoutButtonTap() {
+        guard session != nil,
+              !cancelButtonDisabled else {
+            return
+        }
+
+        showingDiscardConfirmation = false
+        didDiscard = true
     }
 
     /// Handles a tap on the Save button.
@@ -81,6 +135,7 @@ final class ActiveWorkoutViewModel {
 
         saving = true
         presentedError = nil
+        showingDiscardConfirmation = false
 
         Task {
             defer { saving = false }

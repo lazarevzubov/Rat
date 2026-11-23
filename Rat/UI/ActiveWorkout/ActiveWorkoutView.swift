@@ -31,16 +31,32 @@ struct ActiveWorkoutView: View {
             }
         }
             .disabled(viewModel.editingDisabled)
+            .interactiveDismissDisabled(viewModel.interactiveDismissDisabled)
             .scrollDismissesKeyboard(.immediately)
             .onTouchBelowContent { focusedField = nil }
             .navigationTitle(viewModel.session?.dayName ?? "Workout")
             .onDisappear { focusedField = nil }
-            .onChange(of: viewModel.didSave) {
+            .onChange(of: viewModel.shouldDismiss) {
                 if $1 {
                     dismiss()
                 }
             }
             .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        focusedField = nil
+                        viewModel.handleCancelButtonTap()
+                    }
+                        .disabled(viewModel.cancelButtonDisabled)
+                        .confirmationDialog(
+                            "Discard Workout?", isPresented: discardConfirmationBinding, titleVisibility: .visible
+                        ) {
+                            Button("Discard Workout", role: .destructive) { viewModel.handleDiscardWorkoutButtonTap() }
+                            Button("Keep Working Out", role: .cancel) { viewModel.handleKeepWorkingOutButtonTap() }
+                        } message: {
+                            Text("This workout hasn't been saved.")
+                        }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(
                         viewModel.saving
@@ -63,6 +79,13 @@ struct ActiveWorkoutView: View {
 
     // MARK: Private properties
 
+    private var discardConfirmationBinding: Binding<Bool> {
+        Binding { viewModel.showingDiscardConfirmation } set: {
+            if !$0 {
+                viewModel.handleKeepWorkingOutButtonTap()
+            }
+        }
+    }
     @Environment(\.dismiss)
     private var dismiss
     private var errorBinding: Binding<Bool> {

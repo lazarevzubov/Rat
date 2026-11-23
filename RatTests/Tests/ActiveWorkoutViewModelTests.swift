@@ -198,6 +198,194 @@ struct ActiveWorkoutViewModelTests {
     }
 
     @Test
+    func handleCancelButtonTap_noSession_requestsDismissal() {
+        let viewModel = ActiveWorkoutViewModel(
+            program: Program(name: "Push Pull Legs"), workoutSessionService: WorkoutSessionStubService()
+        )
+        viewModel.handleCancelButtonTap()
+
+        #expect(
+            viewModel.shouldDismiss
+                && !viewModel.didSave
+                && !viewModel.showingDiscardConfirmation
+                && !viewModel.interactiveDismissDisabled,
+            "Cancel dismisses directly when there is no workout to discard."
+        )
+    }
+
+    @Test
+    func handleCancelButtonTap_unchangedEmptySession_requestsConfirmation() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: WorkoutSessionStubService())
+        await viewModel.handleAppear()
+
+        viewModel.handleCancelButtonTap()
+        #expect(
+            viewModel.showingDiscardConfirmation
+                && !viewModel.shouldDismiss
+                && viewModel.interactiveDismissDisabled,
+            "Even an unchanged, empty seeded workout requires an explicit discard decision."
+        )
+    }
+
+    @Test
+    func handleKeepWorkingOutButtonTap_editedSession_preservesValues() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: WorkoutSessionStubService())
+        await viewModel.handleAppear()
+
+        let sessionID = viewModel.session?.id
+        let editedSet = LoggedSet(kind: .working, weight: 85, reps: 6, position: 0, increaseNextTime: true)
+
+        viewModel.session?.loggedExercises = [
+            LoggedExercise(exerciseName: "Bench Press", position: 0, loggedSets: [editedSet])
+        ]
+        viewModel.handleCancelButtonTap()
+        viewModel.handleKeepWorkingOutButtonTap()
+
+        let retainedSet = viewModel.session?.loggedExercises.first?.loggedSets.first
+        #expect(
+            !viewModel.showingDiscardConfirmation
+                && !viewModel.shouldDismiss
+                && viewModel.interactiveDismissDisabled
+                && (viewModel.session?.id == sessionID)
+                && (retainedSet?.id == editedSet.id)
+                && (retainedSet?.weight == 85)
+                && (retainedSet?.reps == 6)
+                && (retainedSet?.increaseNextTime == true),
+            "Keeping the workout closes confirmation and retains its identity, edits, and reminder flags."
+        )
+    }
+
+    @Test
+    func handleDiscardWorkoutButtonTap_confirmed_requestsDismissalWithoutSaving() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+        let service = WorkoutSessionStubService()
+
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: service)
+        await viewModel.handleAppear()
+
+        viewModel.handleCancelButtonTap()
+        viewModel.handleDiscardWorkoutButtonTap()
+
+        let savedSessions = await service.savedSessions
+        #expect(
+            viewModel.shouldDismiss
+                && !viewModel.didSave
+                && !viewModel.showingDiscardConfirmation
+                && !viewModel.interactiveDismissDisabled
+                && savedSessions.isEmpty,
+            "Confirmed discard requests dismissal without logging the workout."
+        )
+    }
+
+    @Test
+    func handleDiscardWorkoutButtonTap_dialogAlreadyDismissed_requestsDismissal() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: WorkoutSessionStubService())
+        await viewModel.handleAppear()
+
+        viewModel.handleCancelButtonTap()
+        viewModel.handleKeepWorkingOutButtonTap()
+        viewModel.handleDiscardWorkoutButtonTap()
+
+        #expect(
+            viewModel.shouldDismiss
+                && !viewModel.didSave,
+            "The confirmed discard action still dismisses if the native dialog clears presentation first."
+        )
+    }
+
+    @Test
+    func handleSaveButtonTap_afterDiscard_doesNotStartSaving() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: WorkoutSessionStubService())
+        await viewModel.handleAppear()
+
+        viewModel.handleCancelButtonTap()
+        viewModel.handleDiscardWorkoutButtonTap()
+        viewModel.handleSaveButtonTap()
+        viewModel.handleCancelButtonTap()
+
+        #expect(
+            viewModel.shouldDismiss
+                && !viewModel.saving
+                && viewModel.saveButtonDisabled
+                && viewModel.editingDisabled
+                && viewModel.cancelButtonDisabled
+                && !viewModel.showingDiscardConfirmation,
+            "A discarded workout rejects later save and cancel intents while its sheet is dismissing."
+        )
+    }
+
+    @Test
+    func handleCancelButtonTap_saving_keepsWorkoutProtected() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: WorkoutSessionStubService())
+        await viewModel.handleAppear()
+
+        viewModel.handleSaveButtonTap()
+        viewModel.handleCancelButtonTap()
+        viewModel.handleDiscardWorkoutButtonTap()
+
+        #expect(
+            viewModel.saving
+                && viewModel.cancelButtonDisabled
+                && viewModel.interactiveDismissDisabled
+                && !viewModel.showingDiscardConfirmation
+                && !viewModel.shouldDismiss,
+            "A pending save blocks Cancel, discard, and interactive dismissal before its task starts."
+        )
+    }
+
+    @Test
+    func handleCancelButtonTap_afterFailedSave_requestsConfirmation() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+
+        let service = WorkoutSessionStubService()
+        await service.setSaveError(TestError())
+
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: service)
+        await viewModel.handleAppear()
+
+        let sessionID = viewModel.session?.id
+
+        viewModel.handleSaveButtonTap()
+        await waitFor { viewModel.presentedError != nil }
+        viewModel.dismissPresentedError()
+        viewModel.handleCancelButtonTap()
+
+        #expect(
+            viewModel.showingDiscardConfirmation
+                && !viewModel.cancelButtonDisabled
+                && !viewModel.shouldDismiss
+                && viewModel.interactiveDismissDisabled
+                && (viewModel.session?.id == sessionID),
+            "After a save failure, Cancel remains available and the retained workout still requires confirmation."
+        )
+    }
+
+    @Test
+    func handleAppear_afterDirectCancel_doesNotSeedSession() async {
+        let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
+        let viewModel = ActiveWorkoutViewModel(program: program, workoutSessionService: WorkoutSessionStubService())
+
+        viewModel.handleCancelButtonTap()
+        await viewModel.handleAppear()
+
+        #expect(
+            viewModel.shouldDismiss
+                && (viewModel.session == nil),
+            "Loading cannot create a new workout after Cancel has already requested dismissal."
+        )
+    }
+
+    @Test
     func handleSaveButtonTap_succeeds_persistsSession() async {
         let program = Program(name: "Push Pull Legs", dayTemplates: [DayTemplate(name: "Push", position: 0)])
         let service = WorkoutSessionStubService()
@@ -220,7 +408,15 @@ struct ActiveWorkoutViewModelTests {
         viewModel.handleSaveButtonTap()
 
         await waitFor { viewModel.didSave }
-        #expect(viewModel.didSave, "A successful save tells the view to dismiss.")
+        viewModel.handleCancelButtonTap()
+
+        #expect(
+            viewModel.didSave
+                && viewModel.shouldDismiss
+                && !viewModel.showingDiscardConfirmation
+                && !viewModel.interactiveDismissDisabled,
+            "A successful save dismisses directly and a late Cancel cannot request discard confirmation."
+        )
     }
 
     @Test

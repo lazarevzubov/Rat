@@ -1,6 +1,6 @@
 # Rat — Current handoff
 
-Updated November 22, 2026. Read [AGENTS.md](AGENTS.md) for working agreements and [ROADMAP.md](ROADMAP.md) for the
+Updated November 23, 2026. Read [AGENTS.md](AGENTS.md) for working agreements and [ROADMAP.md](ROADMAP.md) for the
 single ordered backlog.
 
 ## Current checkpoint
@@ -8,11 +8,14 @@ single ordered backlog.
 - Local signing settings include `DEVELOPMENT_TEAM = N4WG592BBR` in two app build configurations. Preserve them
   and keep them out of commits. Check `git status` before relying on this snapshot.
 - `ROADMAP.md` describes current behavior and ranks remaining work at Q1–Q20. Implementation plans and outstanding
-  product decisions need approval.
+  product decisions need approval, except for the approved PR unit-test setup described there.
 
 ## Resume from here
 
-**Q1 / R5: surface failed program deletions and restore the list** is next and needs a scoped plan. Saving only
+Finish activating the approved PR unit-test setup in `ROADMAP.md`: the local workflow needs diff review and publication,
+a successful GitHub run, and the required check on `main`. GitHub merge enforcement is not active yet.
+
+**Q1 / R5: surface failed program deletions and restore the list** follows and needs a scoped plan. Saving only
 completed sets remains settled for the later completion-tracking task.
 
 D1, the ignored-navigation-tap device retest, can accompany relevant UI verification without blocking unrelated

@@ -1,0 +1,72 @@
+name: Unit tests
+
+on:
+  pull_request:
+    types: [
+      opened,
+      synchronize,
+      reopened,
+      ready_for_review,
+      edited
+    ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-tests:
+    name: Unit tests
+    runs-on: macos-26
+    timeout-minutes: 30
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out the pull request merge commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Create a dedicated simulator
+        id: simulator
+        run: |
+          simulator_udid="$(xcrun simctl create Rat-Unit-Tests \
+            com.apple.CoreSimulator.SimDeviceType.iPhone-17 \
+            com.apple.CoreSimulator.SimRuntime.iOS-26-5)"
+          echo "udid=$simulator_udid" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$simulator_udid"
+          xcrun simctl bootstatus "$simulator_udid" -b
+
+      - name: Run all unit tests
+        env:
+          RAT_SIMULATOR_UDID: ${{ steps.simulator.outputs.udid }}
+        run: |
+          xcodebuild -project Rat.xcodeproj -scheme Rat -configuration Debug \
+            -destination "platform=iOS Simulator,id=$RAT_SIMULATOR_UDID" \
+            -derivedDataPath "$RUNNER_TEMP/rat-dd" \
+            -resultBundlePath "$RUNNER_TEMP/RatTests.xcresult" \
+            -collect-test-diagnostics never -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 90 \
+            -maximum-test-execution-time-allowance 120 \
+            test -only-testing:RatTests CODE_SIGNING_ALLOWED=NO \
+            | tee "$RUNNER_TEMP/unit-tests.log"
+
+      - name: Upload test results and build log
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: RatTests-results
+          path: |
+            ${{ runner.temp }}/RatTests.xcresult
+            ${{ runner.temp }}/unit-tests.log
+          retention-days: 14

@@ -11,7 +11,7 @@ actor ProgramStubService: ProgramService {
 
     // MARK: Private methods
 
-    private var deleteError: Error?
+    private var deleteErrors = [UUID: Error]()
     private var fetchError: Error?
     private var fetchExerciseNamesError: Error?
     private var saveError: Error?
@@ -22,8 +22,8 @@ actor ProgramStubService: ProgramService {
         self.programs = programs
     }
 
-    func setDeleteError(_ error: Error?) {
-        deleteError = error
+    func setDeleteError(_ error: Error?, for id: UUID) {
+        deleteErrors[id] = error
     }
 
     func setFetchError(_ error: Error?) {
@@ -41,7 +41,7 @@ actor ProgramStubService: ProgramService {
     // MARK: ProgramService protocol methods
 
     func delete(programWithID id: UUID) throws {
-        if let deleteError {
+        if let deleteError = deleteErrors[id] {
             throw deleteError
         }
 

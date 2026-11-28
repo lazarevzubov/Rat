@@ -39,10 +39,10 @@ struct ProgramListView: View {
                 }
             }
             .task { await viewModel.handleAppear() }
-            .alert("Couldn't load programs", isPresented: errorBinding) {
+            .alert(viewModel.presentedErrorTitle ?? "", isPresented: errorBinding) {
                 // No custom actions—the default "OK" button just dismisses the alert.
             } message: {
-                Text(viewModel.loadError?.localizedDescription ?? "")
+                Text(viewModel.presentedError?.localizedDescription ?? "")
             }
             .environment(\.editMode, $editMode)
     }
@@ -52,9 +52,9 @@ struct ProgramListView: View {
     @State
     private var editMode = EditMode.inactive
     private var errorBinding: Binding<Bool> {
-        Binding { viewModel.loadError != nil } set: {
+        Binding { viewModel.presentedError != nil } set: {
             if !$0 {
-                viewModel.dismissLoadError()
+                viewModel.dismissPresentedError()
             }
         }
     }

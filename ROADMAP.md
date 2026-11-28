@@ -1,6 +1,6 @@
 # Rat — Design and remaining work
 
-Updated November 24, 2026. This is the maintained backlog of current behavior, ordered remaining work, and pending
+Updated November 28, 2026. This is the maintained backlog of current behavior, ordered remaining work, and pending
 decisions. Recommendations and unresolved decisions are labeled explicitly.
 
 ## Current product and model
@@ -32,15 +32,9 @@ The `.github/workflows/unit-tests.yml` on `main` defines a `Unit tests` check fo
 and ready-for-review PRs, with a manual trigger as well. It runs the `RatTests` target on a dedicated iOS simulator
 using GitHub's `macos-26` runner, Xcode 26.6, and iOS 26.5. Test results and the build log are retained for 14 days.
 Pin changes need the runner's installed-tool inventory checked again. The workflow makes no app, accessibility,
-localization, telemetry, or schema changes.
-
-**Remaining setup:**
-
-- `main` has no active ruleset or branch protection. Configure it to require pull requests and the `Unit tests` check
-  from GitHub Actions, require branches to be up to date, and apply the requirements to administrators without
-  bypasses. No additional reviewer approval is required by this CI plan; preserve any other chosen protection
-  settings. Import the prepared ruleset from `/tmp/rat-pr-ci.1ozZNX/require-unit-tests.ruleset.json`, then verify the
-  rule is active.
+localization, telemetry, or schema changes. The active `Require unit tests` branch ruleset targets `main`, requires
+pull requests and the up-to-date `Unit tests` check from GitHub Actions, and has no bypass actors or review approval
+requirement.
 
 ## Proposed implementation queue
 
@@ -56,54 +50,48 @@ cross-feature behavior or a substantial design/harness requirement. These are es
 Re-estimate uncertain items after a scoped plan. Grouped entries can require several branches; each implementation
 task still follows the change-size limits and verification rules in `AGENTS.md`.
 
-**Q1–Q20 are proposed execution ranks.** Product task and review IDs are stable references; Q-ranks set the execution
+**Q1–Q19 are proposed execution ranks.** Product task and review IDs are stable references; Q-ranks set the execution
 order. K1–K5 identify additional backlog items below. Remaining implementation plans and pending product
 decisions need approval. Saving only completed sets remains settled.
-
-### High impact, easier fixes
-
-| Rank | Work | Effort | Why here / dependency |
-| --- | --- | --- | --- |
-| Q1 | R5 — Surface failed deletion and restore the list | Small | Prevents a misleading success state and supports recovery; contained VM/error-presentation work. |
 
 ### High impact, more complex or dependency-bound work
 
 | Rank | Work | Effort | Why here / dependency |
 | --- | --- | --- | --- |
-| Q2 | K1 — Preserve unreadable stores and handle startup failure | Medium–large | Protects all programs/history from delete-and-retry recovery. Agree on failure/retry behavior before upcoming schema changes. |
-| Q3 | R2 — Coordinate autosave across editor lifecycle and deletion | Medium–large | Prevents stale writes and lost edits; dismissal, reopening, and deletion must agree. Simple task cancellation is insufficient. |
-| Q4 | R6 — Restore and verify numeric VoiceOver semantics | Medium, uncertain | Concerns core editing accessibility. Resolve the activation-verification gap while preserving settled keyboard behavior. |
-| Q5 | R4 — Keep workout cycling correct after day edits | Medium | Stable day identity needs legacy/deleted-day fallback decisions and migration proof. |
-| Q6 | Product task 1 — Exercise-level Increase Next Time | Medium | Enables the requested reminder workflow; the existing-flag migration choice and on-disk upgrade proof drive effort. |
-| Q7 | Product task 2 — Reliable reminders across program days | Small–medium, blocked | Complete the reminder outcome immediately after task 1. Its smaller isolated diff cannot precede the flag representation it depends on. |
-| Q8 | Product task 3 — Save only completed sets | Medium | Corrects what a saved workout means; completion state, omitted exercises, and reminder rules need a coordinated plan after tasks 1–2. |
-| Q9 | Product task 5 — Workout edits updating program defaults | Large | Requires coordinated program writes plus settled completion/discard behavior and working-max policy. Follow R2 and product tasks 1–3; preserve the current discard behavior. |
+| Q1 | K1 — Preserve unreadable stores and handle startup failure | Medium–large | Protects all programs/history from delete-and-retry recovery. Agree on failure/retry behavior before upcoming schema changes. |
+| Q2 | R2 — Coordinate autosave across editor lifecycle and deletion | Medium–large | Prevents stale writes and lost edits; dismissal, reopening, and deletion must agree. Simple task cancellation is insufficient. |
+| Q3 | R6 — Restore and verify numeric VoiceOver semantics | Medium, uncertain | Concerns core editing accessibility. Resolve the activation-verification gap while preserving settled keyboard behavior. |
+| Q4 | R4 — Keep workout cycling correct after day edits | Medium | Stable day identity needs legacy/deleted-day fallback decisions and migration proof. |
+| Q5 | Product task 1 — Exercise-level Increase Next Time | Medium | Enables the requested reminder workflow; the existing-flag migration choice and on-disk upgrade proof drive effort. |
+| Q6 | Product task 2 — Reliable reminders across program days | Small–medium, blocked | Complete the reminder outcome immediately after task 1. Its smaller isolated diff cannot precede the flag representation it depends on. |
+| Q7 | Product task 3 — Save only completed sets | Medium | Corrects what a saved workout means; completion state, omitted exercises, and reminder rules need a coordinated plan after tasks 1–2. |
+| Q8 | Product task 5 — Workout edits updating program defaults | Large | Requires coordinated program writes plus settled completion/discard behavior and working-max policy. Follow R2 and product tasks 1–3; preserve the current discard behavior. |
 
 ### Lower current user impact, easier improvements
 
 | Rank | Work | Effort | Why here / dependency |
 | --- | --- | --- | --- |
-| Q10 | R10 — Refresh autocomplete within an open editor | Small | Removes repeated typing; manual entry already works. |
-| Q11 | K2 — Correct toolbar labels and empty-program Start Workout | Small | Clearer affordances without changing a core workflow. |
-| Q12 | R7/R8/R12 and K3 — Test reliability and organization | Small tasks | Correct navigation selectors, saved-hierarchy and deletion assertions, and screen-test placement. |
-| Q13 | R11 — Release version metadata and app icon | Small, choices pending | Limited everyday-use benefit, but mandatory before distribution; promote if a release becomes the next milestone. |
-| Q14 | R14 — Share the production schema definition | Small | Reduces maintenance drift; not a functional or migration prerequisite. |
-| Q15 | R13 — Domain ownership and API contracts | Small | Narrow access-control, organization, and documentation cleanup. |
-| Q16 | R16 — Remove redundant guards around previews | Small | Simplifies preview declarations without an intended runtime behavior change. |
-| Q17 | R15 — Simplify bindings/helpers and correct the section heading | Small | Internal clarity with limited direct user benefit; preserve numeric/focus behavior and avoid reworking R6's field changes. |
+| Q9 | R10 — Refresh autocomplete within an open editor | Small | Removes repeated typing; manual entry already works. |
+| Q10 | K2 — Correct toolbar labels and empty-program Start Workout | Small | Clearer affordances without changing a core workflow. |
+| Q11 | R7/R8/R12 and K3 — Test reliability and organization | Small tasks | Correct navigation selectors, saved-hierarchy and deletion assertions, and screen-test placement. |
+| Q12 | R11 — Release version metadata and app icon | Small, choices pending | Limited everyday-use benefit, but mandatory before distribution; promote if a release becomes the next milestone. |
+| Q13 | R14 — Share the production schema definition | Small | Reduces maintenance drift; not a functional or migration prerequisite. |
+| Q14 | R13 — Domain ownership and API contracts | Small | Narrow access-control, organization, and documentation cleanup. |
+| Q15 | R16 — Remove redundant guards around previews | Small | Simplifies preview declarations without an intended runtime behavior change. |
+| Q16 | R15 — Simplify bindings/helpers and correct the section heading | Small | Internal clarity with limited direct user benefit; preserve numeric/focus behavior and avoid reworking R6's field changes. |
 
 ### Lower current user impact, more complex work
 
 | Rank | Work | Effort | Why here / dependency |
 | --- | --- | --- | --- |
-| Q18 | K4 — Program cloning | Medium, scope pending | Convenience feature requiring copy/identity semantics and a new flow; prioritize reliable existing workflows first. |
-| Q19 | K5 — Keyboard dismissal on headers/navigation titles | Medium, uncertain | Remaining convenience gap with known SwiftUI gesture constraints and potentially expensive device verification. |
-| Q20 | Post-v1 statistics, charts, and workout dates/frequency | Large, deferred | Broad optional scope without an approved design; remains deferred until after v1. |
+| Q17 | K4 — Program cloning | Medium, scope pending | Convenience feature requiring copy/identity semantics and a new flow; prioritize reliable existing workflows first. |
+| Q18 | K5 — Keyboard dismissal on headers/navigation titles | Medium, uncertain | Remaining convenience gap with known SwiftUI gesture constraints and potentially expensive device verification. |
+| Q19 | Post-v1 statistics, charts, and workout dates/frequency | Large, deferred | Broad optional scope without an approved design; remains deferred until after v1. |
 
 ### Verification preparation and dependencies
 
 - Keep explicit on-disk persistence and migration harnesses on disk.
-- Repair R7's navigation queries before relying on affected UI tests. R7/R8/R12/K3 work stays at Q12.
+- Repair R7's navigation queries before relying on affected UI tests. R7/R8/R12/K3 work stays at Q11.
 - R14 may be a small preparation task if a schema-owning change actually needs it, but it must not block unrelated
   data-safety fixes or substitute for migration proof. Preserve separate proposed branches for product tasks
   1 and 2; confirmation of that split and the existing product decisions remain pending.
@@ -117,7 +105,7 @@ decisions need approval. Saving only completed sets remains settled.
 ## Product task details (stable IDs)
 
 The IDs below are retained so existing migration references and approved choices remain valid. Execution order comes
-from Q1–Q20 above. Resolve each plan's outstanding decisions before implementation.
+from Q1–Q19 above. Resolve each plan's outstanding decisions before implementation.
 
 ### 1. Exercise-level Increase Next Time
 
@@ -173,7 +161,7 @@ omitted exercises, and interaction with exercise-level reminders using the affec
 ### 5. Workout edits updating program defaults
 
 Requested behavior: editing workout weights/reps should update the program so the next workout reflects those edits. Its
-proposed position is Q9; confirm the detailed behavior before implementation.
+proposed position is Q8; confirm the detailed behavior before implementation.
 
 The proposed approach maps session sets back to templates in memory, preserving the separation of stored history
 from templates, and reuses debounced program saving. Reps and warm-up weight can update their template values;
@@ -222,15 +210,6 @@ can similarly repeat the previously logged day.
 Consider tracking the day template's stable identifier. Define fallback behavior when that day has been removed
 and when existing sessions contain only a position. Cover reorder, deletion before the previous day, removal of
 the previous day, and wrapping. Any stored identifier change needs migration verification.
-
-### R5. [P2] Surface failed program deletions and restore the list
-
-[ProgramListViewModel.swift](Rat/UI/ProgramList/ProgramListViewModel.swift) removes rows optimistically, then discards
-persistence errors with `try?`. A failed deletion leaves the stored program hidden until reload, without presenting an
-error.
-
-Restore or reload failed items and present the deletion error. Cover successful deletion, failure, and partial
-failure when multiple programs are removed. Include the visible error and recovery behavior in UI verification.
 
 ### R6. [P2] Preserve numeric fields' VoiceOver editing semantics
 
@@ -375,4 +354,4 @@ K1–K5 identify the additional proposals in the queue. Their implementation pla
 
 ## Post-v1
 
-Statistics, progression charts, and workout dates/frequency remain deferred at Q20. No implementation plan is approved.
+Statistics, progression charts, and workout dates/frequency remain deferred at Q19. No implementation plan is approved.

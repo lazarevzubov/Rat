@@ -23,7 +23,7 @@ struct ProgramListViewModelTests {
     }
 
     @Test
-    func handleAppear_fails_setsLoadError() async {
+    func handleAppear_fails_setsPresentedError() async {
         let service = ProgramStubService()
         await service.setFetchError(TestError())
 
@@ -32,7 +32,11 @@ struct ProgramListViewModelTests {
         )
         await viewModel.handleAppear()
 
-        #expect(viewModel.loadError is TestError, "A failed load records the error for the view to present.")
+        #expect(
+            (viewModel.presentedError is TestError)
+                && (viewModel.presentedErrorTitle == "Couldn't load programs"),
+            "A failed load records its error and alert title for the view to present."
+        )
     }
 
     @Test
@@ -75,7 +79,7 @@ struct ProgramListViewModelTests {
     }
 
     @Test
-    func dismissLoadError_clearsLoadError() async {
+    func dismissPresentedError_clearsPresentedError() async {
         let service = ProgramStubService()
         await service.setFetchError(TestError())
 
@@ -83,9 +87,13 @@ struct ProgramListViewModelTests {
             programService: service, workoutSessionService: WorkoutSessionStubService()
         )
         await viewModel.handleAppear()
-        viewModel.dismissLoadError()
+        viewModel.dismissPresentedError()
 
-        #expect(viewModel.loadError == nil, "The alert can be dismissed.")
+        #expect(
+            (viewModel.presentedError == nil)
+                && (viewModel.presentedErrorTitle == nil),
+            "The alert can be dismissed."
+        )
     }
 
     @Test
@@ -130,6 +138,82 @@ struct ProgramListViewModelTests {
         await waitFor { await !service.deletedIDs.isEmpty }
 
         #expect(await service.deletedIDs == [program.id], "The deleted program is removed from persistence too.")
+    }
+
+    @Test
+    func handleDelete_fails_restoresProgramAndPresentsError() async {
+        let service = ProgramStubService()
+
+        let program = Program(name: "Zulu")
+        await service.setPrograms(
+            [
+                Program(name: "Alpha"),
+                program
+            ]
+        )
+
+        await service.setDeleteError(TestError(), for: program.id)
+
+        let viewModel = ProgramListViewModel(
+            programService: service, workoutSessionService: WorkoutSessionStubService()
+        )
+        await viewModel.handleAppear()
+
+        viewModel.handleDelete(at: [1])
+        await waitFor { viewModel.presentedError is TestError }
+
+        #expect(
+            (
+                viewModel.programs.map(\.name) == [
+                    "Alpha",
+                    "Zulu"
+                ]
+            )
+                && (viewModel.presentedErrorTitle == "Couldn't delete program"),
+            "A failed deletion restores the program in order and presents its error."
+        )
+    }
+
+    @Test
+    func handleDelete_partiallyFails_restoresOnlyFailedPrograms() async {
+        let service = ProgramStubService()
+
+        let legs = Program(name: "Legs")
+        let pull = Program(name: "Pull")
+        let push = Program(name: "Push")
+
+        await service.setPrograms(
+            [
+                legs,
+                pull,
+                push
+            ]
+        )
+        await service.setDeleteError(TestError(), for: pull.id)
+
+        let viewModel = ProgramListViewModel(
+            programService: service, workoutSessionService: WorkoutSessionStubService()
+        )
+        await viewModel.handleAppear()
+
+        viewModel.handleDelete(at: [0, 1, 2])
+        await waitFor { viewModel.presentedError is TestError }
+
+        let deletedIDs = await service.deletedIDs
+        let persistedIDs = await service.programs.map(\.id)
+
+        #expect(
+            (viewModel.programs.map(\.id) == [pull.id])
+                && (persistedIDs == [pull.id])
+                && (
+                    deletedIDs == [
+                        legs.id,
+                        push.id
+                    ]
+                )
+                && (viewModel.presentedErrorTitle == "Couldn't delete program"),
+            "Partial failure keeps successful deletions removed and restores only the failed program."
+        )
     }
 
     @Test

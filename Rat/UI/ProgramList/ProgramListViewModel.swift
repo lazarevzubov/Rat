@@ -12,8 +12,10 @@ final class ProgramListViewModel {
     var newProgram: Program?
     /// The distinct exercise names used across all programs, offered as autocomplete suggestions when editing an exercise's name.
     private(set) var exerciseNameSuggestions = [String]()
-    /// The error from the most recent failed load, if any.
-    private(set) var loadError: Error?
+    /// The error from the most recent failed operation, if any.
+    private(set) var presentedError: Error?
+    /// The title for the most recent error alert, if any.
+    private(set) var presentedErrorTitle: String?
     /// The currently loaded programs.
     private(set) var programs = [Program]()
 
@@ -43,22 +45,42 @@ final class ProgramListViewModel {
     /// Handles the programs at the given offsets being deleted from the list.
     /// - Parameter offsets: The offsets, within `programs`, of the programs to delete.
     func handleDelete(at offsets: IndexSet) {
-        let idsToDelete = offsets.map { programs[$0].id }
+        let programsToDelete = offsets.map { programs[$0] }
         programs.remove(atOffsets: offsets)
 
         let programService = programService
         Task {
-            await withTaskGroup(of: Void.self) { group in
-                for id in idsToDelete {
-                    group.addTask { try? await programService.delete(programWithID: id) }
+            var failedPrograms = [Program]()
+            var deletionError: Error?
+
+            for program in programsToDelete {
+                do {
+                    try await programService.delete(programWithID: program.id)
+                } catch {
+                    failedPrograms.append(program)
+                    deletionError = deletionError ?? error
                 }
             }
+
+            guard !failedPrograms.isEmpty,
+                  let deletionError else {
+                return
+            }
+
+            let programIDs = Set(programs.map(\.id))
+            programs.append(contentsOf: failedPrograms.filter { !programIDs.contains($0.id) })
+
+            programs.sort { $0.name < $1.name }
+
+            presentedErrorTitle = failedPrograms.count == 1 ? "Couldn't delete program" : "Couldn't delete programs"
+            presentedError = deletionError
         }
     }
 
-    /// Dismisses the current load error, if any.
-    func dismissLoadError() {
-        loadError = nil
+    /// Dismisses the current error alert, if any.
+    func dismissPresentedError() {
+        presentedError = nil
+        presentedErrorTitle = nil
     }
 
     /// Handles this list's view appearing.
@@ -88,7 +110,8 @@ final class ProgramListViewModel {
         do {
             programs = try await fetchedPrograms
         } catch {
-            loadError = error
+            presentedErrorTitle = "Couldn't load programs"
+            presentedError = error
         }
         exerciseNameSuggestions = (try? await fetchedExerciseNames) ?? []
     }

@@ -17,6 +17,9 @@ information that still affects the next steps, stated as a current constraint.
   considerations in the scope; the app currently has no localization or telemetry.
 - Use one `feature/<kebab-description>` or `bugfix/<kebab-description>` branch per distinct change, including local
   work. Leave the resulting diff unstaged for the user's review and edits.
+- Before requesting PR merge, finish all required code, configuration, documentation, and cleanup in that PR. Update
+  `HANDOFF.md` and `ROADMAP.md` to the state that will be true after merge. Apply and verify any required external
+  settings before merge; do not plan follow-up work after merge.
 - Leave changes unstaged until the user reviews them. Approval of the presented diff, including "LGTM", authorizes
   staging, committing, and pushing the reviewed changes for that task. Then continue the next approved step, or
   open a draft PR when the task is complete. Implementation requests alone do not authorize commits or pushes;

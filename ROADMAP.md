@@ -1,6 +1,6 @@
 # Rat — Design and remaining work
 
-Updated November 23, 2026. This is the maintained backlog of current behavior, ordered remaining work, and pending
+Updated November 24, 2026. This is the maintained backlog of current behavior, ordered remaining work, and pending
 decisions. Recommendations and unresolved decisions are labeled explicitly.
 
 ## Current product and model
@@ -26,22 +26,21 @@ Swift Concurrency, and Swift Testing, with an iOS 18.0 deployment target and Swi
 - Programs can be created blank and edited with debounced autosave (500 ms). Done dismisses the new-program sheet;
   Start Workout is in the program editor toolbar. Program cloning is not implemented.
 
-## Approved PR unit-test setup
+## PR unit-test checks
 
-The local `.github/workflows/unit-tests.yml` defines a `Unit tests` check for new, updated, reopened, retargeted, and
-ready-for-review PRs, with a manual trigger as well. It runs the entire `RatTests` target, including future tests, on a
-dedicated iOS simulator using GitHub's `macos-26` runner, Xcode 26.6, and iOS 26.5. UI tests are excluded from
-execution. Test results and the build log are retained for 14 days. Pin changes need the runner's installed-tool
-inventory checked again. The workflow makes no app, accessibility, localization, telemetry, or schema changes.
+The `.github/workflows/unit-tests.yml` on `main` defines a `Unit tests` check for new, updated, reopened, retargeted,
+and ready-for-review PRs, with a manual trigger as well. It runs the `RatTests` target on a dedicated iOS simulator
+using GitHub's `macos-26` runner, Xcode 26.6, and iOS 26.5. Test results and the build log are retained for 14 days.
+Pin changes need the runner's installed-tool inventory checked again. The workflow makes no app, accessibility,
+localization, telemetry, or schema changes.
 
-**Remaining activation work:**
+**Remaining setup:**
 
-- Review the unstaged diff before committing/pushing and opening a draft PR, as required by `AGENTS.md`.
-- Verify the first GitHub run succeeds; local Xcode 27.2 verification does not establish hosted Xcode 26.6 behavior.
-- Configure `main` to require a PR and the `Unit tests` check from GitHub Actions, require the branch to be up to date,
-  and apply the requirements to administrators without bypasses. No additional reviewer approval is required by this
-  CI plan; preserve any existing protection requirements. GitHub settings need an authenticated browser because the
-  connected GitHub tools do not expose branch-rule editing. The required check is not enforced yet.
+- `main` has no active ruleset or branch protection. Configure it to require pull requests and the `Unit tests` check
+  from GitHub Actions, require branches to be up to date, and apply the requirements to administrators without
+  bypasses. No additional reviewer approval is required by this CI plan; preserve any other chosen protection
+  settings. Import the prepared ruleset from `/tmp/rat-pr-ci.1ozZNX/require-unit-tests.ruleset.json`, then verify the
+  rule is active.
 
 ## Proposed implementation queue
 
